@@ -12,7 +12,7 @@ O núcleo (sessão, salvamento, planilha, testes) veio do portal "Vieses e Decis
 | GitHub | https://github.com/marcelcolling/o-que-e-estrategia (público) |
 | Site (GitHub Pages) | https://marcelcolling.github.io/o-que-e-estrategia/ (publica sozinho a cada `git push`, cerca de 1 min) |
 | Planilha de respostas | id `1u83Aw17rn3-g_iOtOhLEcx2WMXNI6hJHTPZUtlEH6lQ` (dá para ler pelo conector do Google Drive) |
-| URL do Apps Script | em `assets/js/config.js` |
+| URL do Apps Script | em `assets/js/config.js` (implantação de 07/10/2026, testada contra a planilha real) |
 | PDF original do artigo | `...\Documentos\ESTRATÉGIA\PORTER - WHAT IS STRATEGY.pdf` (pasta acima). **Nunca publicar nem linkar** (decisão do professor; copyright da HBR) |
 
 ## Decisões do professor (não reverter sem perguntar)
