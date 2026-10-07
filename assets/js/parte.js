@@ -313,11 +313,12 @@
 
   /* ================================================================ progresso */
   var INST = {};
-  function perguntas() {
-    // uma "pergunta" = um campo de texto ou um grupo de opções (caixas de seleção da síntese não contam)
+  function perguntas(raiz) {
+    // uma "pergunta" = um campo de texto ou um grupo de opções. Não contam: caixas de seleção da síntese
+    // e campos opcionais (data-opcional, ex.: anotações do mapa)
     var grupos = {}, lista = [];
-    campos().forEach(function (c) {
-      if (c.type === 'checkbox' || grupos[c.dataset.campo]) return;
+    (raiz || document).querySelectorAll('[data-campo]').forEach(function (c) {
+      if (c.type === 'checkbox' || c.hasAttribute('data-opcional') || grupos[c.dataset.campo]) return;
       grupos[c.dataset.campo] = true;
       lista.push(c);
     });
@@ -327,49 +328,148 @@
     if (c.type === 'radio') return !!document.querySelector('input[data-campo="' + c.dataset.campo + '"]:checked');
     return !!c.value.trim();
   }
+  function contar(raiz) {
+    var ps = perguntas(raiz), ok = ps.filter(respondida).length, total = ps.length;
+    (raiz || document).querySelectorAll('[data-widget]').forEach(function (el) {
+      var w = INST[el.dataset.widget];
+      if (!w || !w.respondido) return;
+      total++;
+      if (w.respondido(w.coletar())) ok++;
+    });
+    return { ok: ok, total: total };
+  }
   var tProg = null;
   function atualizarProgresso() { clearTimeout(tProg); tProg = setTimeout(progresso, 250); }
+  function barra(el, ok, total) { if (el) el.style.width = (total ? ok / total * 100 : 0) + '%'; }
   function progresso() {
-    var ps = perguntas(), feitas = ps.filter(respondida).length;
-    var widgets = Object.keys(INST).filter(function (k) { return INST[k].respondido; });
-    var wFeitos = widgets.filter(function (k) { return INST[k].respondido(INST[k].coletar()); }).length;
-    var total = ps.length + widgets.length, ok = feitas + wFeitos;
+    var g = contar();
     var sp = document.querySelector('.sidebar-progresso');
-    if (sp) {
-      sp.querySelector('.sp-txt').textContent = ok + ' de ' + total + ' respostas';
-      sp.querySelector('.sp-barra i').style.width = (total ? ok / total * 100 : 0) + '%';
+    if (sp) { sp.querySelector('.sp-txt').textContent = g.ok + ' de ' + g.total + ' respostas'; barra(sp.querySelector('.sp-barra i'), g.ok, g.total); }
+    var ig = document.querySelector('.ind-geral');
+    if (ig) { ig.querySelector('.ig-num').textContent = g.ok; ig.querySelector('.ig-txt').textContent = 'de ' + g.total + ' respostas'; barra(ig.querySelector('.sp-barra i'), g.ok, g.total); }
+    // por módulo: cartões do índice e itens do sumário
+    var proximo = null, algum = g.ok > 0;
+    MODS.forEach(function (m, i) {
+      var c = contar(m), feito = c.total > 0 && c.ok === c.total;
+      var card = document.querySelector('.mod-card[data-mod="' + m.id + '"]');
+      var nav = document.querySelector('.nav-mod[data-mod="' + m.id + '"]');
+      if (card) {
+        card.querySelector('.mc-prog').textContent = c.total ? (feito ? '✓ ' : '') + c.ok + '/' + c.total + ' respostas' : 'Leitura';
+        barra(card.querySelector('.mc-barra i'), c.ok, c.total);
+        card.classList.toggle('feito', feito);
+        card.classList.toggle('sem-atividade', !c.total);
+      }
+      if (nav) { nav.querySelector('.nm-p').textContent = c.total ? (feito ? '✓' : c.ok + '/' + c.total) : ''; nav.classList.toggle('feito', feito); }
+      if (!proximo && c.total && !feito) proximo = { m: m, i: i };
+    });
+    var cont = document.querySelector('.btn-continuar');
+    if (cont && MODS.length) {
+      var alvo = proximo || { m: MODS[0], i: 0 };
+      cont.href = '#' + alvo.m.id;
+      cont.textContent = algum ? 'Continuar: módulo ' + (alvo.i + 1) + ' · ' + alvo.m.dataset.titulo : 'Começar pelo módulo 1';
     }
-    // quadro "Minhas respostas", por seção
-    var porSecao = [], idx = {};
-    perguntas().forEach(function (c) {
-      var s = c.closest('[data-secao]'); var nome = s ? s.dataset.secao : 'Outras';
-      if (!(nome in idx)) { idx[nome] = porSecao.length; porSecao.push({ nome: nome, total: 0, ok: 0, primeira: null }); }
-      var g = porSecao[idx[nome]];
-      g.total++;
-      if (respondida(c)) g.ok++; else if (!g.primeira) g.primeira = c;
-    });
-    var notas = pars().filter(function (p) { return p.querySelector('textarea[data-nota]').value.trim(); }).length;
-    var dest = pars().filter(function (p) { return p.classList.contains('destacado'); }).length;
-    var exps = INST.simulador ? (INST.simulador.coletar() || { exp: [] }).exp.length : 0;
-    var box = document.querySelector('.resumo-respostas');
-    if (!box) return;
-    box.innerHTML =
-      '<div class="rr-topo"><div class="rr-num"><strong>' + ok + '</strong><span>de ' + total + ' respostas</span></div>' +
-      '<div class="rr-extra"><span>' + dest + ' parágrafo(s) destacado(s)</span><span>' + notas + ' anotação(ões) no texto</span><span>' + exps + ' experimento(s) no simulador</span></div></div>' +
-      '<ul class="rr-lista">' + porSecao.map(function (g, i) {
-        var feito = g.ok === g.total;
-        return '<li class="' + (feito ? 'feito' : '') + '"><span class="rr-sec">' + esc(g.nome) + '</span><span class="rr-cont">' + g.ok + '/' + g.total + '</span>' +
-          (feito ? '<span class="rr-ok">✓</span>' : '<button type="button" class="rr-ir" data-i="' + i + '">Ir para a próxima</button>') + '</li>';
-      }).join('') + '</ul>';
-    box.querySelectorAll('.rr-ir').forEach(function (b) {
-      b.onclick = function () {
-        var alvo = porSecao[Number(b.dataset.i)].primeira;
-        var det = alvo.closest('details'); if (det) det.open = true;
-        alvo.closest('.ativ').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(function () { alvo.focus({ preventScroll: true }); }, 500);
-      };
-    });
+    resumirMapa();
     compararExit();
+  }
+
+  /* ----- Mapa de aprendizagem: resumo dos níveis ----- */
+  var NIVEIS = [['domino', 'Domino'], ['parcial', 'Domino parcialmente'], ['nao', 'Ainda não domino']];
+  function resumirMapa() {
+    var box = document.querySelector('.mapa-resumo'); if (!box) return;
+    var itens = document.querySelectorAll('.mapa-item'), n = { domino: 0, parcial: 0, nao: 0 }, marcados = 0;
+    itens.forEach(function (li, i) {
+      var r = li.querySelector('input[type=radio]:checked');
+      if (r) { n[r.value]++; marcados++; }
+    });
+    if (!marcados) { box.innerHTML = '<p class="mr-vazio">Marque cada objetivo para ver o seu mapa.</p>'; return; }
+    box.innerHTML = '<div class="mr-barra">' + NIVEIS.map(function (v) {
+      return n[v[0]] ? '<span class="mr-' + v[0] + '" style="flex:' + n[v[0]] + '"></span>' : '';
+    }).join('') + (itens.length - marcados ? '<span class="mr-sem" style="flex:' + (itens.length - marcados) + '"></span>' : '') + '</div>' +
+      '<ul class="mr-leg">' + NIVEIS.map(function (v) { return '<li><i class="mr-' + v[0] + '"></i>' + v[1] + ' <b>' + n[v[0]] + '</b></li>'; }).join('') +
+      (itens.length - marcados ? '<li><i class="mr-sem"></i>Sem marcação <b>' + (itens.length - marcados) + '</b></li>' : '') + '</ul>';
+  }
+
+  /* ================================================================ navegação por módulos */
+  var MODS = [];
+  function semAnimacao(f) {
+    var h = document.documentElement, antes = h.style.scrollBehavior;
+    h.style.scrollBehavior = 'auto'; f(); h.style.scrollBehavior = antes;
+  }
+  function fecharSumario() {
+    document.getElementById('sidebar').classList.remove('open');
+    var t = document.getElementById('sidebar-toggle'); if (t) t.classList.remove('active');
+    var o = document.getElementById('overlay'); if (o) o.style.display = 'none';
+  }
+  function marcarSumario(mod) {
+    document.querySelectorAll('.nav-mod').forEach(function (a) { a.classList.toggle('ativo', !!mod && a.dataset.mod === mod.id); });
+    document.querySelectorAll('.nav-subs').forEach(function (s) { s.classList.toggle('aberto', !!mod && s.dataset.subs === mod.id); });
+    var ind = document.querySelector('.nav-indice'); if (ind) ind.classList.toggle('ativo', !mod);
+  }
+  function mostrarModulo(mod, el) {
+    MODS.forEach(function (m) { m.hidden = m !== mod; });
+    document.getElementById('indice').hidden = true;
+    document.body.classList.add('em-modulo');
+    marcarSumario(mod);
+    if (el) { var d = el.closest('details'); while (d) { d.open = true; d = d.parentElement && d.parentElement.closest('details'); } }
+    window.dispatchEvent(new Event('resize'));   // recalcula caixas de texto e o gráfico do simulador
+    semAnimacao(function () {
+      if (el && el !== mod) el.scrollIntoView({ block: 'start' });
+      else window.scrollTo(0, 0);
+    });
+    fecharSumario();
+  }
+  function mostrarIndice() {
+    MODS.forEach(function (m) { m.hidden = true; });
+    document.getElementById('indice').hidden = false;
+    document.body.classList.remove('em-modulo');
+    marcarSumario(null);
+    semAnimacao(function () { window.scrollTo(0, 0); });
+    fecharSumario();
+    progresso();
+  }
+  function rota() {
+    var h = decodeURIComponent(location.hash.slice(1));
+    var el = h ? document.getElementById(h) : null;
+    var mod = el ? (el.classList.contains('modulo') ? el : el.closest('.modulo')) : null;
+    if (mod) mostrarModulo(mod, el); else mostrarIndice();
+  }
+  function abrir(id) {
+    var el = document.getElementById(id); if (!el) return;
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+    rota();
+  }
+  function ligarNavegacao() {
+    MODS = Array.prototype.slice.call(document.querySelectorAll('.modulo'));
+    window.addEventListener('hashchange', rota);
+    // um link para o hash atual não dispara "hashchange": trata o clique na mão
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href^="#"]'); if (!a) return;
+      if (a.getAttribute('href') === location.hash) { e.preventDefault(); rota(); }
+    });
+    // sumário no celular
+    var toggle = document.getElementById('sidebar-toggle'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('overlay');
+    toggle.addEventListener('click', function () {
+      var aberto = sidebar.classList.toggle('open');
+      toggle.classList.toggle('active', aberto);
+      overlay.style.display = aberto ? 'block' : 'none';
+    });
+    overlay.addEventListener('click', fecharSumario);
+    // barra de progresso de leitura, item ativo do sumário e voltar ao topo
+    var barraLeitura = document.getElementById('progress-bar'), topo = document.getElementById('back-to-top'), agendado = false;
+    function aoRolar() {
+      agendado = false;
+      var total = document.documentElement.scrollHeight - window.innerHeight;
+      barraLeitura.style.width = (total > 0 ? window.scrollY / total * 100 : 0) + '%';
+      topo.style.display = window.scrollY > 600 ? 'flex' : 'none';
+      var subs = document.querySelectorAll('.nav-subs.aberto .nav-sub'), atual = null;
+      subs.forEach(function (a) {
+        var alvo = document.getElementById(a.getAttribute('href').slice(1));
+        if (alvo && alvo.getBoundingClientRect().top <= 140) atual = a;
+      });
+      subs.forEach(function (a) { a.classList.toggle('ativo', a === atual); });
+    }
+    window.addEventListener('scroll', function () { if (!agendado) { agendado = true; requestAnimationFrame(aoRolar); } }, { passive: true });
+    topo.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
   /* ----- exit ticket: compara com a preparação ----- */
@@ -392,12 +492,21 @@
       if (f) INST[el.dataset.widget] = f(el);
     });
     ligarParagrafos();
+    ligarNavegacao();
+    // anotação opcional de cada objetivo do mapa
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('.b-mapa-nota'); if (!b) return;
+      var lab = b.parentNode.querySelector('.mapa-nota'), ta = lab.querySelector('textarea');
+      if (lab.hidden) lab.hidden = false; else if (!ta.value.trim()) lab.hidden = true;
+      b.setAttribute('aria-expanded', String(!lab.hidden));
+      if (!lab.hidden) ta.focus();
+    });
     document.addEventListener('click', function (e) {
       var b = e.target.closest('[data-trazer]'); if (!b) return;
       var par = b.dataset.trazer.split(':');
       var de = document.querySelector('[data-campo="' + par[0] + '"]'), para = document.querySelector('[data-campo="' + par[1] + '"]');
       if (!de || !para) return;
-      if (!de.value.trim()) { VD.toast('Você ainda não respondeu à pergunta da preparação, no início da página.'); return; }
+      if (!de.value.trim()) { VD.toast('Você ainda não respondeu à pergunta "Antes de ler", no início do módulo Texto de Porter.'); return; }
       if (para.value.trim() && para.value !== de.value && !window.confirm('Substituir o que você já escreveu?')) return;
       para.value = de.value;
       para.dispatchEvent(new Event('input', { bubbles: true }));
@@ -416,22 +525,30 @@
         aplicarCampos(d && d.campos);
         aplicarParagrafos(d);
         Object.keys(INST).forEach(function (k) { INST[k].aplicar(d ? d[k] : null); });
+        document.querySelectorAll('.mapa-nota').forEach(function (lab) {
+          var tem = !!lab.querySelector('textarea').value.trim();
+          lab.hidden = !tem;
+          lab.parentNode.querySelector('.b-mapa-nota').setAttribute('aria-expanded', String(tem));
+        });
         progresso();
       },
       resumo: resumo,
       infoImpressao: function () { return cfg.crumb; }
     });
-    // na impressão, abre as respostas recolhidas
+    rota();
+    // na impressão, mostra todos os módulos e abre as respostas recolhidas
     var abertos = [];
     window.addEventListener('beforeprint', function () {
+      document.body.classList.add('imprimindo');
       var ds = document.querySelectorAll('details');
       abertos = Array.prototype.map.call(ds, function (d) { return d.open; });
       Array.prototype.forEach.call(ds, function (d) { d.open = true; });
     });
     window.addEventListener('afterprint', function () {
+      document.body.classList.remove('imprimindo');
       Array.prototype.forEach.call(document.querySelectorAll('details'), function (d, i) { d.open = abertos[i]; });
     });
   }
 
-  window.PARTE = { iniciar: iniciar, resumo: resumo, instancias: INST };
+  window.PARTE = { iniciar: iniciar, resumo: resumo, instancias: INST, abrir: abrir };
 })();

@@ -30,6 +30,22 @@ const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
     ok(!q(w, '.vd-modal').hidden, 'sem sessão, o modal de login abre');
     ok(w.document.querySelectorAll('.par').length === 22 && w.document.querySelectorAll('.ativ-pausa').length === 5, 'tradução com 22 parágrafos e 5 pausas para responder');
 
+    /* ---- módulos: índice, um módulo por vez, navegação ---- */
+    const visiveis = () => Array.from(w.document.querySelectorAll('.modulo')).filter(m => !m.hidden).map(m => m.id);
+    ok(w.document.querySelectorAll('.mod-card').length === 12 && !q(w, '#indice').hidden && visiveis().length === 0, 'página abre no índice, com 12 módulos e nenhum aberto');
+    w.location.hash = '#m-mapa-de-aprendizagem';
+    await sleep(300);
+    ok(visiveis().join() === 'm-mapa-de-aprendizagem' && q(w, '#indice').hidden, 'abrir um módulo mostra só ele e esconde o índice');
+    q(w, '#m-mapa-de-aprendizagem .mn-prox').click();
+    await sleep(300);
+    ok(visiveis().join() === 'm-texto-de-porter' && q(w, '.nav-mod.ativo').dataset.mod === 'm-texto-de-porter', 'botão "Próximo" abre o módulo seguinte e marca o sumário');
+    w.location.hash = '#simulador';
+    await sleep(300);
+    ok(visiveis().length === 1 && q(w, '#simulador').closest('.modulo') && !q(w, '#simulador').closest('.modulo').hidden, 'link para um ponto interno abre o módulo certo');
+    w.location.hash = '#indice';
+    await sleep(300);
+    ok(!q(w, '#indice').hidden && visiveis().length === 0, 'voltar ao índice');
+
     /* ---- modelo da Vivelar: números do material (7.6 a 7.8) ---- */
     const S = w.VIVELAR.simular({}), K = S.k;
     const tab = { 6: [6.4, 3.8, 1.5], 12: [12.5, 11.2, 6.8], 18: [17.7, 17.6, 13.4], 24: [22.6, 23.7, 20.9], 30: [27.3, 29.8, 28.8], 36: [32.0, 35.9, 36.8] };
@@ -57,6 +73,14 @@ const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
     ok(JSON.stringify(est.dados).includes('Implantação de CRM'), 'rascunho anônimo adotado e enviado à planilha');
 
     /* ---- preencher as atividades ---- */
+    // mapa de aprendizagem
+    marcar(w, 'mapa_1', 'domino');
+    marcar(w, 'mapa_2', 'parcial');
+    q(w, '.mapa-item .b-mapa-nota').click();
+    ok(!q(w, '.mapa-item .mapa-nota').hidden, 'mapa: botão Anotar abre a anotação do objetivo');
+    digitar(w, campo(w, 'mapa_1_nota'), 'Rever a diferença com exemplos');
+    await sleep(400);
+    ok(q(w, '.mr-leg').textContent.includes('Domino 1') && q(w, '.mr-leg').textContent.includes('Domino parcialmente 1') && q(w, '.mr-leg').textContent.includes('Sem marcação 5'), 'mapa resume os níveis marcados');
     marcar(w, 'prep_efeito', 'melhor');
     marcar(w, 'b1_checagem_tipo', 'EO');
     digitar(w, campo(w, 'b1_checagem'), 'Faz melhor a mesma atividade');
@@ -110,11 +134,16 @@ const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
     ok(res.includes('Faz melhor a mesma atividade') && res.includes('Eficácia operacional') && res.includes('Bloco 1'), 'resumo legível com seção, pergunta e resposta');
     ok(res.includes('§8') && res.includes('[destacado]'), 'resumo inclui anotações e destaques nos parágrafos');
     ok(res.includes('Empresa 1') && res.includes('Iniciativa 1') && res.includes('Experimento 1') && res.includes('Perda de volume nas redes em B: 25'), 'resumo inclui fronteira, portfólio e experimentos do simulador');
+    ok(res.includes('Mapa de aprendizagem') && res.includes('Objetivo 1: Distinguir') && res.includes('Domino parcialmente') && res.includes('Rever a diferença'), 'resumo inclui o mapa de aprendizagem com níveis e anotação');
     ok(q(w, '.vd-status').textContent.includes('Salvo na planilha'), 'indicador mostra "Salvo na planilha" (' + q(w, '.vd-status').textContent + ')');
-    ok(q(w, '.sp-txt').textContent.match(/^\d+ de \d+ respostas$/) && q(w, '.rr-num strong').textContent !== '0', 'progresso na barra lateral e em "Minhas respostas": ' + q(w, '.sp-txt').textContent);
+    const cardMapa = q(w, '.mod-card[data-mod="m-mapa-de-aprendizagem"] .mc-prog').textContent;
+    ok(q(w, '.sp-txt').textContent.match(/^\d+ de \d+ respostas$/) && q(w, '.ig-num').textContent !== '0' && cardMapa === '2/7 respostas', 'progresso no sumário, no índice e por módulo (mapa: ' + cardMapa + ')');
+    ok(q(w, '.btn-continuar').textContent.startsWith('Continuar: módulo'), 'índice oferece "Continuar" no próximo módulo pendente: ' + q(w, '.btn-continuar').textContent);
 
     /* ---- caixa que cresce, botão Salvar ---- */
     const ta = campo(w, 'b6_executar');
+    w.PARTE.abrir(ta.closest('.modulo').id);
+    await sleep(200);
     const h0 = ta.offsetHeight;
     digitar(w, ta, 'linha\n'.repeat(15) + 'fim');
     await sleep(100);
@@ -135,6 +164,7 @@ const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
     r = await w.VD.entrar({ nome: 'TESTE PORTER', chave: 'ABCD' });
     await sleep(1200);
     ok(r.ok && campo(w, 'prep_iniciativa').value === 'Implantação de CRM' && q(w, 'input[data-campo="b1_checagem_tipo"][value="EO"]').checked, 'em outro computador, as respostas voltam da planilha');
+    ok(q(w, 'input[data-campo="mapa_2"][value="parcial"]').checked && !q(w, '.mapa-item .mapa-nota').hidden, 'mapa de aprendizagem volta, com a anotação visível');
     ok(q(w, '#p3').classList.contains('destacado') && q(w, '#p8 textarea[data-nota]').value === 'Definição central do artigo' && !q(w, '#p8 .par-nota').hidden, 'destaques e anotações voltam');
     ok(q(w, '.fr-cartao[data-i="0"] .fr-nome').value.startsWith('Azul') && q(w, '.pf-linha .pf-cat').value === 'paridade', 'fronteira e portfólio voltam');
     ok(q(w, '.sim-exp-txt') && q(w, '.sim-exp-txt').value.startsWith('Com perda maior') && q(w, '.sim-ctl[data-k="imitacao"] select').value === '19', 'simulador volta com o experimento e as premissas');
@@ -156,6 +186,7 @@ const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
     const card = w.document.getElementById('sessaoCard').textContent;
     ok(card.includes('Teste Porter') && card.includes('Salva'), 'home mostra o progresso do estudante');
     ok(q(w, '[data-ferramenta="aula1"]').textContent.includes('✓'), 'home marca a Aula 1 como iniciada');
+    ok(w.document.querySelectorAll('.etapa:first-child .rec').length === 1 && q(w, '.etapa:first-child .rec').getAttribute('href') === 'partes/parte-1.html', 'home tem um único botão para a Aula 1');
     ok(w.document.querySelectorAll('.fase').length === 7 && q(w, '.obras li.destaque').textContent.includes('What Is Strategy'), 'seção "Quem é Michael Porter" com as fases e o artigo em destaque');
     ok(!w.document.querySelector('a[href$=".pdf"]'), 'nenhum link para PDF');
     w.VD.sair();

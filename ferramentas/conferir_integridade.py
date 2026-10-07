@@ -21,7 +21,8 @@ import sys
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 PAGINA = RAIZ / "partes" / "parte-1.html"
-MATERIAL = RAIZ / "conteudo" / "aula-1-material.md"
+# versão do material escrita para o estudante (o original do professor, aula-1-material.md, fica só como referência)
+MATERIAL = RAIZ / "conteudo" / "aula-1-material-estudante.md"
 REF_EN = RAIZ / "conteudo" / "referencia-parte-1-en.txt"
 VAZIOS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
@@ -79,7 +80,8 @@ def conferir_material(pagina):
     p = Texto(["material-cab", "material"])
     p.feed(pagina)
     visivel = tokens(" ".join(p.saida["material-cab"] + p.saida["material"]))
-    original = tokens(MATERIAL.read_text(encoding="utf-8"))
+    md = "\n".join(l for l in MATERIAL.read_text(encoding="utf-8").splitlines() if not l.strip().startswith(":::"))
+    original = tokens(md)
     sm = difflib.SequenceMatcher(None, original, visivel, autojunk=False)
     faltam, sobram = [], []
     for op, i1, i2, j1, j2 in sm.get_opcodes():

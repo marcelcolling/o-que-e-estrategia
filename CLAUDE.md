@@ -21,22 +21,30 @@ O núcleo (sessão, salvamento, planilha, testes) veio do portal "Vieses e Decis
 - Os `.md` de origem (material da aula, texto original) **não vão para o GitHub**: `conteudo/` está no `.gitignore` e fica só na pasta local (OneDrive). O que é publicado é o HTML gerado.
 - Uma parte do artigo por aula. Por enquanto só a Parte I tem conteúdo; Partes II a V aparecem como "Em breve" na home.
 - Identidade do "Vieses e Decisão" com azul-escuro no lugar do roxo.
+- **Material e atividades são uma coisa só:** na home, um único botão por aula.
+- **O material fala direto com o estudante** ("você"), sem roteiro de aula, tempos, notas ao professor nem "os alunos devem…". O original do professor (`conteudo/aula-1-material.md`) é só referência; a página é gerada da versão revisada `conteudo/aula-1-material-estudante.md` (enxuta, sem redundâncias). A integridade é conferida contra essa versão.
+- **Um módulo por vez:** a página da aula abre num índice de cartões; cada módulo (Mapa, Texto de Porter, Abertura, Blocos 1–7, Fechamento, Para consulta) é aberto separadamente, com "Anterior / Índice / Próximo".
+- **Mapa de aprendizagem** no lugar dos objetivos: cada objetivo com Domino / Domino parcialmente / Ainda não domino e uma anotação opcional.
 
 ## Arquitetura (site estático, sem build de JS)
 
 ```
 index.html                     home: hero + sessão, trilha das 5 partes, "Quem é Michael Porter" (bio + obras por fase)
-partes/parte-1.html            GERADO por ferramentas/gerar_parte.py (não editar à mão)
-conteudo/  (fora do git)       porter-parte-1-traducao.md, aula-1-material.md, referencia-parte-1-en.txt, referencia-porter-original.md
-ferramentas/gerar_parte.py     tradução + material (Markdown) + atividades -> página da parte
-ferramentas/atividades_parte1.py  caixas de atividade (chaves data-campo), REGRAS de onde entram e o MODELO da página
+partes/parte-1.html            GERADO por ferramentas/gerar_parte.py (não editar à mão): índice + 12 módulos
+conteudo/  (fora do git)       porter-parte-1-traducao.md, aula-1-material-estudante.md (fonte), aula-1-material.md (original do professor),
+                               referencia-parte-1-en.txt, referencia-porter-original.md
+ferramentas/gerar_parte.py     tradução + material (Markdown) + atividades -> página da parte (cada "##" do material vira um módulo;
+                               o Texto de Porter entra como módulo 2; "::: visual nome" insere um esquema)
+ferramentas/atividades_parte1.py  caixas de atividade (chaves data-campo), mapa(), visual(), MODULOS (tipo/título curto/descrição),
+                                  REGRAS de onde cada caixa entra e o MODELO da página
 ferramentas/conferir_integridade.py  confere material (palavra por palavra) e tradução (contra o PDF)
 ferramentas/capturar_telas.py  capturas no Edge headless via CDP (1366px e 520px)
 ferramentas/testes/            teste de ponta a ponta com Apps Script simulado (rodar_testes.ps1)
 assets/js/portal.js            núcleo: sessão, login, salvamento automático, sincronização, conflito, barra superior, guia de uso
-assets/js/parte.js             página da parte: campos, destacar/anotar parágrafos, widgets, resumo, progresso
+assets/js/parte.js             página da parte: campos, destacar/anotar parágrafos, widgets, resumo, progresso por módulo,
+                               navegação por hash (#m-… abre um módulo; #id interno abre o módulo dele e rola até o ponto)
 assets/js/vivelar.js           modelo mensal do caso Vivelar (Apêndice A) + simulador
-assets/js/leitura.js           sumário lateral, barra de progresso, voltar ao topo
+assets/js/leitura.js           (não é usado na página da parte; sobrou do núcleo de referência)
 assets/css/portal.css · leitura.css · parte.css
 apps-script/Codigo.gs          back-end na planilha (doPost entrar/salvar, abas legíveis, Painel, menu)
 ```
@@ -47,7 +55,9 @@ apps-script/Codigo.gs          back-end na planilha (doPost entrar/salvar, abas 
 - **Prefixos próprios no navegador:** `pe_sessao_v1`, `pe_dados_v1::`, `pe_leitura_`. Os portais do professor ficam no mesmo domínio (`marcelcolling.github.io`) e compartilham o `localStorage`; com os prefixos do outro portal, a sessão e o `aula1` vazariam entre eles. Há um teste para isso.
 - **Uma atividade por aula:** ids `aula1` a `aula5`. Formato salvo (ver `parte.js`):
   `{ v:1, campos:{ chave: texto|opção|true }, notas:{ "8": texto }, destaques:[3,8], fronteira, portfolio, logo, simulador:{ p, exp } }`.
-- As chaves de `campos` vêm do atributo `data-campo` em `atividades_parte1.py`. **Não renomeie chaves em uso** (as respostas ficariam órfãs). Para tirar uma pergunta, apague a caixa; para acrescentar, use chave nova. Os parágrafos da tradução são identificados pelo número (`notas`/`destaques`): **não junte nem divida parágrafos** depois que a turma começar.
+- Módulos escondidos usam o atributo `hidden`, mas continuam no DOM: coleta, aplicação e resumo funcionam com todos eles. Ao abrir um módulo, `parte.js` dispara `resize` para recalcular a altura das caixas de texto e o gráfico do simulador.
+- O progresso conta perguntas (campo de texto ou grupo de opções) e widgets; não contam as caixas da síntese nem campos `data-opcional` (anotações do mapa).
+- As chaves de `campos` vêm do atributo `data-campo` em `atividades_parte1.py`. **Não renomeie chaves em uso** (as respostas ficariam órfãs). O mapa usa `mapa_1`…`mapa_7` e `mapa_N_nota`. A chave `b2_duvida7` deixou de existir na revisão (a Dúvida 7 foi incorporada ao Bloco 5). Para tirar uma pergunta, apague a caixa; para acrescentar, use chave nova. Os parágrafos da tradução são identificados pelo número (`notas`/`destaques`): **não junte nem divida parágrafos** depois que a turma começar.
 - `resumo` percorre a página em ordem (`[data-campo]`, `[data-widget]`, `.par`) e gera `[seção, pergunta, resposta]` para a aba do estudante. A seção vem de `data-secao` da caixa; a pergunta, de `data-rotulo`.
 - Todo texto do estudante que entra em `innerHTML` passa por `VD.esc`. Valores em campos são atribuídos por `.value`.
 
@@ -75,7 +85,8 @@ O professor cola o `Codigo.gs` novo no editor (Extensões › Apps Script), salv
 ## Armadilhas já encontradas
 
 - **Planilha em pt-BR:** não gravar fórmulas (separador `;`); links por `RichTextValue`; todo texto passa por `texto()` (prefixa `'` em `= + - @`).
-- **Capturas:** `--screenshot` do Edge headless captura no meio da rolagem suave (âncoras e `scroll-behavior:smooth`) e às vezes antes dos scripts terminarem. Use `python ferramentas/capturar_telas.py <pasta> [nomes]`, que controla o Edge pelo CDP, espera a URL nova e a barra superior, e rola de forma instantânea.
+- **Capturas:** `--screenshot` do Edge headless captura no meio da rolagem suave (âncoras e `scroll-behavior:smooth`) e às vezes antes dos scripts terminarem. Use `python ferramentas/capturar_telas.py <pasta> [nomes]`, que controla o Edge pelo CDP, abre o módulo pelo id (`PARTE.abrir`), espera a URL nova e a barra superior, e recarrega se a página travar.
+- **Headless travando no carregamento:** às vezes o Edge headless para o parser logo depois das folhas de estilo (`readyState` fica em `loading`, nenhum script é pedido), mesmo com o servidor entregando o HTML em 0,2 s. Não é defeito da página (no navegador normal e no site publicado ela carrega). Por isso: o teste roda em tempo real via CDP com `Runtime.enable` (`rodar_testes.py`; o antigo `--dump-dom` com tempo virtual não chegava a iniciar), e a captura recarrega a página quando ela não fica pronta.
 - **Edge headless** (`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`): largura mínima real ≈ 500px. Não há Node na máquina.
 - **CSS:** `leitura.css` tem `.secao p { font-size; color }` com especificidade (0,1,1): estilos de `<p>` dentro do material precisam de seletor mais forte (ex.: `.secao p.fr-status`).
 - **Ids que começam com número** (`7-6-…`) funcionam nas âncoras, mas não com `querySelector('#7-6…')`. Use `getElementById` ou `[id="…"]`.

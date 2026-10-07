@@ -1,13 +1,16 @@
 """
-Atividades da Parte I (Aula 1) e onde cada uma entra no material.
+Atividades da Parte I (Aula 1), onde cada uma entra no material, os módulos e o modelo da página.
 
 ATENÇÃO: as chaves usadas em data-campo (ex.: "b1_checagem") são gravadas na planilha.
 Não renomeie uma chave depois que a turma começar a responder: as respostas salvas
 ficariam órfãs. Para tirar uma pergunta, apague a caixa; para acrescentar, use uma chave nova.
 
 Tudo o que é marcado com data-atividade fica fora da conferência de integridade do material.
+Campos com data-opcional não entram na contagem de progresso (ex.: anotações do mapa).
 """
 import html
+import math
+import re
 
 E = lambda s: html.escape(s, quote=True)  # noqa: E731
 
@@ -40,22 +43,19 @@ def pausa(chave, pergunta):
                  tipo="Pausa para responder", classe="ativ-pausa")
 
 
-ANTES = "Escreva a sua resposta <strong>antes</strong> de abrir a do material. Depois compare: o que você acertou, o que faltou?"
+ANTES = "Escreva a sua resposta <strong>antes</strong> de abrir o comentário. Depois compare: o que você acertou, o que faltou?"
 
 B = {}
 
 B["prep"] = caixa(
     "Antes de ler", "Uma iniciativa da sua empresa",
-    "Esta é a pergunta da preparação da aula. Responda antes de ler o texto de Porter; você vai voltar a ela no exit ticket.",
+    "Responda antes de ler o texto de Porter. Você vai voltar a esta resposta no exit ticket.",
     campo("prep_iniciativa", "Cite uma iniciativa da sua empresa (ou de uma empresa que você conhece bem) dos últimos dois anos", 3,
           "Ex.: implantação de um novo ERP, abertura de um canal digital, programa de redução de custos…")
     + escolha("prep_efeito", "Ela fez a empresa ficar…", [("melhor", "Melhor"), ("diferente", "Mais diferente"),
                                                          ("as duas", "As duas coisas"), ("não sei", "Ainda não sei")])
     + campo("prep_porque", "Por quê?", 3),
-    tipo="Preparação")
-
-B["prep_ref"] = ('<p class="ativ-ref" data-atividade>✎ Você respondeu a esta pergunta no início da página, '
-                 '<a href="#antes-de-ler">antes de ler o texto de Porter</a>.</p>')
+    tipo="Antes de ler")
 
 B["abertura_provocacao"] = caixa(
     "Abertura", "Pense na sua empresa", "",
@@ -68,14 +68,14 @@ B["b1_checagem"] = caixa(
             [("EO", "Eficácia operacional"), ("estratégia", "Estratégia"), ("depende", "Depende")])
     + campo("b1_checagem", "Justifique", 3))
 
-for n in range(1, 8):
+for n in range(1, 7):
     B[f"b2_duvida{n}"] = caixa(
-        "Bloco 2 · Pontos que geram dúvida", f"Dúvida {n}: sua resposta",
-        "Antes de ler a resposta do material, responda à dúvida com o que você entendeu do texto de Porter.",
+        "Bloco 2 · Dúvidas comuns", f"Dúvida {n}: sua resposta",
+        "Antes de abrir o comentário, responda com o que você entendeu do texto de Porter.",
         campo(f"b2_duvida{n}", f"Dúvida {n}: minha resposta antes de ler", 3, mostrar_rotulo=False))
 
 B["b2_colunas"] = caixa(
-    "Bloco 2 · Pontos que geram dúvida", "Melhor, diferente ou não sei?",
+    "Bloco 2 · Dúvidas comuns", "Melhor, diferente ou não sei?",
     "Liste iniciativas reais (uma por linha) e classifique-as. A coluna <em>Não sei</em> costuma ser a mais rica: "
     "ali aparecem iniciativas que são EO, mas se vendem como estratégia.",
     '<div class="colunas3">'
@@ -86,17 +86,17 @@ B["b2_colunas"] = caixa(
     + campo("b2_col_teste", "Aplique o teste da renúncia a uma iniciativa da coluna “Não sei”: um concorrente poderia adotá-la sem abrir mão de nada?", 3))
 
 B["b2_convergencia"] = caixa(
-    "Bloco 2 · Pontos que geram dúvida", "A convergência no seu setor", "",
+    "Bloco 2 · Dúvidas comuns", "A convergência no seu setor", "",
     campo("b2_convergencia", "Quantas empresas do seu setor usam a mesma consultoria, o mesmo ERP, a mesma agência ou o mesmo operador logístico? O que isso faz com as diferenças entre elas?", 4))
 
 B["b2_setor_br"] = caixa(
-    "Bloco 2 · Pontos que geram dúvida", "O retrato japonês no Brasil", "",
+    "Bloco 2 · Dúvidas comuns", "O retrato japonês no Brasil", "",
     campo("b2_setor_br", "Que setor brasileiro se parece com o retrato das empresas japonesas de 1996? Justifique com atividades concretas, não com impressões.", 4))
 
 B["b3_fronteira"] = caixa(
-    "Bloco 3 · Fronteira de produtividade", "Exercício rápido: posicione três empresas",
-    "Escolha um setor que você conhece. Para cada empresa, mova os controles: a posição de custo (da esquerda, custo alto, "
-    "para a direita, custo baixo) e o valor entregue além do preço. O gráfico mostra se ela fica abaixo da fronteira ou sobre ela.",
+    "Bloco 3 · Fronteira de produtividade", "Posicione três empresas",
+    "Para cada empresa, mova os controles: a posição de custo (da esquerda, custo alto, para a direita, custo baixo) "
+    "e o valor entregue além do preço. O gráfico mostra se ela fica abaixo da fronteira ou sobre ela.",
     campo("b3_setor", "Setor escolhido", 1, "Ex.: companhias aéreas, bancos, academias, supermercados")
     + '<div class="fronteira-widget" data-widget="fronteira"></div>'
     + campo("b3_inovacao", "Uma inovação recente que empurrou a fronteira desse setor", 2)
@@ -165,7 +165,7 @@ B["simulador"] = (
     '<div class="ativ ativ-simulador" data-atividade data-secao="Bloco 7 · Simulador Vivelar" id="simulador">'
     '<div class="ativ-cab"><span class="ativ-ico" aria-hidden="true">▦</span><span class="ativ-tipo">Laboratório</span>'
     '<span class="ativ-titulo">Simulador da Vivelar</span></div>'
-    '<p class="ativ-enunciado">O simulador refaz, mês a mês, as contas do caso com o mesmo modelo do Apêndice A. Com as premissas '
+    '<p class="ativ-enunciado">O simulador refaz, mês a mês, as contas do caso com o modelo descrito em "Para consulta". Com as premissas '
     'do material, ele reproduz as tabelas 7.6 a 7.8. Mude <strong>uma premissa por vez</strong>, observe o que muda na conclusão e '
     'registre cada experimento.</p>'
     '<div class="sim-widget" data-widget="simulador"></div></div>')
@@ -175,13 +175,13 @@ B["b7_licao"] = caixa(
     campo("b7_licao", "Qual das sete lições contraria o que você pensava antes do caso? Por quê?", 3))
 
 B["b7_perguntas"] = caixa(
-    "Bloco 7 · Caso Vivelar", "Perguntas do caso (responda individualmente)", "",
+    "Bloco 7 · Caso Vivelar", "Perguntas sobre o caso", "",
     campo("b7_q1", "1. Quais premissas de B você considera mais frágeis? Como testá-las antes de investir?", 3)
     + campo("b7_q2", "2. O líder conseguiria replicar o modelo nos independentes? O que ele teria de abandonar para isso?", 3)
     + campo("b7_q3", "3. Se você fosse o conselho, com que horizonte e com quais indicadores avaliaria B? O que diria ao CFO no mês 18?", 3)
     + campo("b7_q4", "4. Onde está a EO no Cenário B? Seria possível fazer B sem fazer A?", 3)
     + campo("b7_q5", "5. Reescreva um objetivo do BSC A para que ele deixe de sobreviver à troca de logo (só faça sentido para a Vivelar)", 3)
-    + campo("b7_q6", "6. Se a Vivelar precisar negociar com distribuidores, o que muda no Cenário B? Isso reforça ou enfraquece a posição?", 3))
+    + campo("b7_q6", "6. Farmácias independentes costumam comprar via distribuidores. Se a Vivelar precisar negociar com eles, o que muda no Cenário B? Isso reforça ou enfraquece a posição?", 3))
 
 SINTESE = [
     "Vantagem é uma diferença que se consegue preservar, no preço, no custo ou nos dois.",
@@ -200,25 +200,139 @@ B["sintese"] = caixa(
 
 B["exit"] = caixa(
     "Fechamento · Exit ticket", "Exit ticket",
-    'Retome a iniciativa que você citou no início <button type="button" class="b-trazer" data-trazer="prep_iniciativa:exit_iniciativa">Usar a iniciativa da preparação</button>',
+    'Retome a iniciativa que você citou no início <button type="button" class="b-trazer" data-trazer="prep_iniciativa:exit_iniciativa">Usar a iniciativa do início</button>',
     campo("exit_iniciativa", "Iniciativa em curso", 2)
     + escolha("exit_classe", "Classificação", [("a", "(a) EO de paridade"), ("b", "(b) EO de liderança temporária"), ("c", "(c) Reforço de posição")])
     + campo("exit_justificativa", "Justificativa (em até três linhas)", 3)
     + campo("exit_quem", "Quem tende a capturar o ganho dela daqui a dois anos?", 2)
     + '<div class="exit-compara" data-atividade aria-live="polite"></div>'
-    + campo("exit_mudou", "O que mudou na sua leitura entre a preparação e agora?", 3))
+    + campo("exit_mudou", "O que mudou na sua leitura entre o início da aula e agora?", 3))
 
-B["fechamento_final"] = ""
+B["mapa_volta"] = ('<p class="ativ-ref ativ-ref-mapa" data-atividade>↺ Para terminar, volte ao '
+                   '<a href="#m-mapa-de-aprendizagem">Mapa de aprendizagem</a> e atualize como você está em cada objetivo.</p>')
+
+
+def bloco(chave):
+    return B[chave]
+
+
+# ---------------------------------------------------------------- Mapa de aprendizagem
+NIVEIS = [("domino", "Domino"), ("parcial", "Domino parcialmente"), ("nao", "Ainda não domino")]
+
+
+def mapa(itens, inline):
+    """Lista de objetivos do material virando o Mapa: cada objetivo com três níveis e uma anotação opcional."""
+    linhas = []
+    for k, (_, num, txt) in enumerate(itens, 1):
+        rot = f"Objetivo {k}: {re.sub(r'[*]+', '', txt)}"
+        radios = "".join(
+            f'<label class="pilula pilula-{v}"><input type="radio" name="mapa_{k}" value="{v}" data-campo="mapa_{k}" data-rotulo="{E(rot)}"><span>{E(t)}</span></label>'
+            for v, t in NIVEIS)
+        linhas.append(
+            f'<li class="mapa-item"><div class="mapa-obj"><span class="n">{num}.</span> {inline(txt)}</div>'
+            f'<div class="mapa-resp" data-atividade><div class="pilulas" role="group" aria-label="Como você está no objetivo {k}">{radios}</div>'
+            f'<button type="button" class="b-mapa-nota" aria-expanded="false">✎ Anotar</button>'
+            f'<label class="mapa-nota" hidden><span>Anotação sobre o objetivo {k}</span>'
+            f'<textarea data-campo="mapa_{k}_nota" data-opcional data-rotulo="Objetivo {k}: anotação" rows="2" '
+            f'placeholder="O que ainda não está claro? O que você quer rever?"></textarea></label></div></li>')
+    return ('<div class="mapa" data-secao="Mapa de aprendizagem">'
+            '<div class="mapa-resumo" data-atividade aria-live="polite"></div>'
+            f'<ol class="mapa-lista">{"".join(linhas)}</ol></div>')
+
+
+# ---------------------------------------------------------------- esquema visual (3.2)
+def _bez(p, t):
+    (x0, y0), (x1, y1), (x2, y2), (x3, y3) = p
+    u = 1 - t
+    return (u**3 * x0 + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t**3 * x3,
+            u**3 * y0 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t**3 * y3)
+
+
+def visual(nome):
+    if nome != "fronteira":
+        return ""
+    F = [(110, 78), (380, 70), (520, 118), (556, 336)]       # fronteira atual
+    N = [(110, 44), (420, 34), (572, 92), (604, 336)]        # fronteira deslocada
+    d = lambda p: f"M{p[0][0]} {p[0][1]} C {p[1][0]} {p[1][1]}, {p[2][0]} {p[2][1]}, {p[3][0]} {p[3][1]}"  # noqa: E731
+    A, Bp = (190, 262), (320, 292)
+    C, D = _bez(F, 0.14), _bez(F, 0.66)
+    alvo = _bez(F, 0.30)
+    vx, vy = alvo[0] - A[0], alvo[1] - A[1]
+    L = math.hypot(vx, vy)
+    fim = (A[0] + vx * (L - 16) / L, A[1] + vy * (L - 16) / L)
+    ini = (A[0] + vx * 14 / L, A[1] + vy * 14 / L)
+    s1, s2 = _bez(F, 0.86), _bez(N, 0.86)
+    arco_ini, arco_fim = (C[0] + 4, C[1] - 22), (D[0] - 14, D[1] - 18)
+    ctrl = ((arco_ini[0] + arco_fim[0]) / 2 + 40, min(arco_ini[1], arco_fim[1]) - 40)
+    f = lambda v: f"{v:.0f}"  # noqa: E731
+    return f"""<figure class="esquema" data-atividade>
+<svg viewBox="0 0 680 420" role="img" aria-label="Esquema da fronteira de produtividade: as empresas A e B estão abaixo da curva; a seta de A até a curva é melhoria de eficácia operacional; C e D estão sobre a curva em pontos diferentes, o que é posicionamento; uma curva tracejada mais acima mostra a fronteira depois de uma nova tecnologia.">
+  <defs>
+    <marker id="seta-eo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#c4521f"/></marker>
+    <marker id="seta-pos" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2a78d6"/></marker>
+    <marker id="seta-des" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5E6878"/></marker>
+  </defs>
+  <rect x="80" y="24" width="540" height="312" rx="8" fill="#F6F5F0"/>
+  <path d="{d(F)} L 110 336 Z" fill="rgba(235,104,52,0.08)"/>
+  <text x="120" y="324" class="esq-zona">Abaixo da fronteira: espaço para EO</text>
+  <path d="{d(N)}" fill="none" stroke="#5E6878" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="612" y="58" text-anchor="end" class="esq-rot esq-cinza">nova fronteira</text>
+  <path d="{d(F)}" fill="none" stroke="#1F3A5F" stroke-width="4" stroke-linecap="round"/>
+  <text x="532" y="304" text-anchor="end" class="esq-rot">fronteira de produtividade</text>
+  <line x1="{f(s1[0] + 4)}" y1="{f(s1[1] - 2)}" x2="{f(s2[0] - 5)}" y2="{f(s2[1] + 1)}" stroke="#5E6878" stroke-width="2" marker-end="url(#seta-des)"/>
+  <line x1="{f(ini[0])}" y1="{f(ini[1])}" x2="{f(fim[0])}" y2="{f(fim[1])}" stroke="#c4521f" stroke-width="3" marker-end="url(#seta-eo)"/>
+  <text x="{f((A[0] + alvo[0]) / 2 + 12)}" y="{f((A[1] + alvo[1]) / 2 + 8)}" class="esq-rot esq-laranja">EO: aproximar-se da fronteira</text>
+  <path d="M{f(arco_ini[0])} {f(arco_ini[1])} Q {f(ctrl[0])} {f(ctrl[1])} {f(arco_fim[0])} {f(arco_fim[1])}" fill="none" stroke="#2a78d6" stroke-width="2.5" marker-start="url(#seta-pos)" marker-end="url(#seta-pos)"/>
+  <text x="{f(ctrl[0] - 10)}" y="{f(ctrl[1] + 6)}" class="esq-rot esq-azul" text-anchor="middle">posicionamento: escolher onde ficar</text>
+  <circle cx="{A[0]}" cy="{A[1]}" r="13" fill="#eb6834"/><text x="{A[0]}" y="{A[1] + 5}" class="esq-pt">A</text>
+  <circle cx="{Bp[0]}" cy="{Bp[1]}" r="13" fill="#eb6834"/><text x="{Bp[0]}" y="{Bp[1] + 5}" class="esq-pt">B</text>
+  <circle cx="{f(C[0])}" cy="{f(C[1])}" r="13" fill="#2a78d6"/><text x="{f(C[0])}" y="{f(C[1] + 5)}" class="esq-pt">C</text>
+  <circle cx="{f(D[0])}" cy="{f(D[1])}" r="13" fill="#2a78d6"/><text x="{f(D[0])}" y="{f(D[1] + 5)}" class="esq-pt">D</text>
+  <text x="84" y="356" class="esq-ax">custo alto</text>
+  <text x="616" y="356" text-anchor="end" class="esq-ax">custo baixo</text>
+  <text x="350" y="394" text-anchor="middle" class="esq-eixo">Posição relativa de custo</text>
+  <text x="66" y="40" text-anchor="end" class="esq-ax">alto</text>
+  <text x="66" y="334" text-anchor="end" class="esq-ax">baixo</text>
+  <text x="26" y="180" text-anchor="middle" class="esq-eixo" transform="rotate(-90 26 180)">Valor entregue além do preço</text>
+</svg>
+<figcaption class="esq-legenda"><span><i class="lg-eo"></i>Empresas abaixo da fronteira e a melhoria de EO</span><span><i class="lg-pos"></i>Empresas na fronteira, em posições diferentes</span><span><i class="lg-des"></i>A fronteira depois de uma nova tecnologia</span></figcaption>
+</figure>"""
+
+
+# ---------------------------------------------------------------- módulos
+# (prefixo do título no material, tipo, título curto, descrição)
+MODULOS = [
+    ("Mapa de aprendizagem", "Diagnóstico", "Mapa de aprendizagem", "Marque o que você já domina e volte aqui no fim da aula."),
+    ("Texto de Porter", "Leitura", "Texto de Porter (Parte I)", "Tradução da Parte I, com destaques, anotações e pausas para responder."),
+    ("Abertura", "Abertura", "O que Porter contesta", "As “novas regras” dos anos 1990 e a tese central da Parte I."),
+    ("Bloco 1", "Bloco 1", "Definições", "Diferença preservável, atividades e as duas definições."),
+    ("Bloco 2", "Bloco 2", "Dúvidas comuns", "Seis dúvidas frequentes: responda antes de ler o comentário."),
+    ("Bloco 3", "Bloco 3", "A fronteira de produtividade", "O conceito central da Parte I, em um esquema e em um exercício."),
+    ("Bloco 4", "Bloco 4", "EO como vantagem temporária", "Por que a vantagem baseada em EO se dissipa, com o caso da IA."),
+    ("Bloco 5", "Bloco 5", "Trade-offs falsos e reais", "Quando o trade-off é ilusão e quando é escolha."),
+    ("Bloco 6", "Bloco 6", "Da distinção à execução", "Duas agendas e quatro práticas para aplicar na sua empresa."),
+    ("Bloco 7", "Bloco 7", "Caso Vivelar", "BSC, números e simulador: EO pura contra EO com posição."),
+    ("Fechamento", "Fechamento", "Síntese e exit ticket", "Seis ideias, exit ticket e revisão do mapa."),
+    ("Para consulta", "Consulta", "Para consulta", "Como a simulação funciona, armadilhas comuns e referências."),
+]
+
+
+def info_modulo(titulo):
+    for prefixo, tipo, curto, desc in MODULOS:
+        if titulo.startswith(prefixo):
+            return {"tipo": tipo, "curto": curto, "desc": desc}
+    return {"tipo": "Módulo", "curto": titulo, "desc": ""}
+
 
 # ---------------------------------------------------------------- onde cada atividade entra
 # (prefixo do título da seção/subseção, regra). Regras:
 #   apos_titulo: caixas logo depois do título | fim: caixas no fim da subseção
-#   antes_revelar: caixas antes da resposta esperada (que fica recolhida)
+#   antes_revelar: caixas antes do comentário (que fica recolhido)
 #   recolher: recolhe todo o conteúdo da subseção (as Dúvidas do Bloco 2)
-#   apos_bloco: [(trecho do parágrafo, [caixas])]
+#   apos_bloco: [(trecho do parágrafo, [caixas])] | mapa: a lista numerada vira o Mapa de aprendizagem
 REGRAS = [
-    ("Preparação dos alunos", {"fim": ["prep_ref"]}),
-    ("Provocação para abrir a discussão", {"fim": ["abertura_provocacao"]}),
+    ("Mapa de aprendizagem", {"mapa": True}),
+    ("Uma provocação para começar", {"fim": ["abertura_provocacao"]}),
     ("Pergunta de checagem", {"antes_revelar": ["b1_checagem"]}),
     ("Dúvida 1:", {"apos_titulo": ["b2_duvida1"], "recolher": True, "fim": ["b2_colunas"]}),
     ("Dúvida 2:", {"apos_titulo": ["b2_duvida2"], "recolher": True}),
@@ -226,28 +340,23 @@ REGRAS = [
     ("Dúvida 4:", {"apos_titulo": ["b2_duvida4"], "recolher": True}),
     ("Dúvida 5:", {"apos_titulo": ["b2_duvida5"], "recolher": True}),
     ("Dúvida 6:", {"apos_titulo": ["b2_duvida6"], "recolher": True, "fim": ["b2_setor_br"]}),
-    ("Dúvida 7:", {"apos_titulo": ["b2_duvida7"], "recolher": True}),
-    ("3.5 Exercício rápido", {"fim": ["b3_fronteira"]}),
+    ("3.5 Exercício", {"fim": ["b3_fronteira"]}),
     ("4.5 Pergunta para debate", {"antes_revelar": ["b4_debate"]}),
-    ("5.5 Pergunta de fixação", {"antes_revelar": ["b5_fixacao"]}),
-    ("6.1 A provocação central", {"fim": ["b6_executar"]}),
-    ("6.3 Quatro práticas", {"apos_bloco": [("Um diagnóstico útil para a turma", ["b6_portfolio"]),
+    ("5.4 Pergunta de fixação", {"antes_revelar": ["b5_fixacao"]}),
+    ("6.1 Executar bem", {"fim": ["b6_executar"]}),
+    ("6.3 Quatro práticas", {"apos_bloco": [("Na maioria das empresas, quase todo", ["b6_portfolio"]),
                                             ("Aplique o teste ao **conjunto**", ["b6_logo"]),
                                             ("Adotar continua sendo, muitas vezes", ["b6_filtro"])]}),
-    ("6.4 Uma tensão conceitual", {"fim": ["b6_excelencia"]}),
-    ("7.2 Um esclarecimento", {"antes_revelar": ["b7_ansoff"]}),
+    ("6.4 Excelência operacional", {"fim": ["b6_excelencia"]}),
+    ("7.2 Ansoff não é Porter", {"antes_revelar": ["b7_ansoff"]}),
     ("7.4 Os três cenários", {"fim": ["b7_palpite"]}),
     ("BSC do Cenário B", {"apos_bloco": [("**Sugestão para debate:**", ["b7_renuncia"])]}),
     ("7.8 Análise de sensibilidade", {"fim": ["simulador"]}),
     ("7.9 O que os números ensinam", {"fim": ["b7_licao"]}),
-    ("7.10 Perguntas para os grupos", {"fim": ["b7_perguntas"]}),
+    ("7.10 Perguntas sobre o caso", {"fim": ["b7_perguntas"]}),
     ("Síntese em seis ideias", {"fim": ["sintese"]}),
-    ("Exit ticket", {"fim": ["exit"]}),
+    ("Exit ticket", {"fim": ["exit", "mapa_volta"]}),
 ]
-
-
-def bloco(chave):
-    return B[chave]
 
 
 MODELO = r"""<!DOCTYPE html>
@@ -270,67 +379,34 @@ MODELO = r"""<!DOCTYPE html>
 <button id="sidebar-toggle" aria-label="Abrir sumário"><span></span><span></span><span></span></button>
 <div id="overlay"></div>
 
-<nav id="sidebar" aria-label="Sumário">
+<nav id="sidebar" aria-label="Módulos da aula">
   <div class="sidebar-badge"><span class="dot"></span><span>Aula {{n}} · Parte I</span></div>
   <div class="sidebar-title">Eficácia operacional não é estratégia</div>
   <div class="sidebar-progresso" aria-live="polite"><span class="sp-txt">0 respostas</span><span class="sp-barra"><i></i></span></div>
   <a class="nav-item nav-voltar" href="../index.html">← Voltar ao portal</a>
-  <a class="nav-item" href="#intro">Início</a>
+  <a class="nav-indice" href="#indice">☰ Índice da aula</a>
   {{nav}}
 </nav>
 
 <main class="wrapper">
 
-  <section class="hero" id="intro">
-    <div class="hero-tag"><span class="dot"></span>Aula {{n}} · Parte I do artigo · pp. 37–40</div>
-    <h1>{{titulo_m}}</h1>
-    <p class="hero-sub">Porter, <em>What Is Strategy?</em> (1996): por que fazer melhor o que todos fazem não é o mesmo que ter uma estratégia.</p>
-    <div class="hero-meta">
-      <div class="meta-item"><span class="meta-label">Texto de Porter</span><span class="meta-value">{{n_par}} parágrafos · ~{{min_t}} min</span></div>
-      <div class="meta-item"><span class="meta-label">Material da aula</span><span class="meta-value">~{{min_m}} min de leitura</span></div>
-      <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">Atividades + exit ticket</span></div>
+  <section class="indice" id="indice">
+    <div class="hero" id="intro" data-integro="material-cab">
+      <div class="hero-tag" data-atividade><span class="dot"></span>Aula {{n}} · Parte I do artigo · pp. 37–40</div>
+      <h1>{{titulo_m}}</h1>
+      <p class="hero-sub">{{sub_m}}</p>
     </div>
-    <ol class="passos" aria-label="Como estudar esta parte">
-      <li><a href="#texto"><span class="passo-n">A</span><span><strong>Leia Porter</strong>Tradução da Parte I. Destaque, anote e responda às pausas.</span></a></li>
-      <li><a href="#material"><span class="passo-n">B</span><span><strong>Estude o material</strong>Conceitos, dúvidas e exercícios, com as atividades no próprio texto.</span></a></li>
-      <li><a href="#simulador"><span class="passo-n">C</span><span><strong>Pratique</strong>Caso Vivelar com simulador, e feche com o exit ticket.</span></a></li>
+    <div class="ficha" data-integro="material">{{ficha}}</div>
+    <div class="ind-topo" data-atividade>
+      <div><span class="bloco-eyebrow">Índice da aula</span><h2>{{total}} módulos, um de cada vez</h2>
+      <p>Abra um módulo para estudar. Ao terminar, siga para o próximo pelo botão no fim da página.</p></div>
+      <div class="ind-geral"><strong class="ig-num">0</strong><span class="ig-txt">de 0 respostas</span><span class="sp-barra"><i></i></span></div>
+    </div>
+    <ol class="mod-cards" data-atividade>
+{{cards}}
     </ol>
-  </section>
-
-  <section class="bloco-grande" id="texto">
-    <header class="bloco-cab">
-      <span class="bloco-letra">A</span>
-      <div><span class="bloco-eyebrow">Leitura · texto de Porter</span><h2 class="bloco-titulo">{{t_titulo}}</h2>
-      <p class="bloco-sub">{{t_autor}} · {{t_fonte}}</p></div>
-    </header>
-    <p class="t-nota">{{t_nota}}</p>
-    <div id="antes-de-ler">{{pre}}</div>
-    <div class="ferr-ajuda" data-atividade><strong>Leitura ativa:</strong> passe o mouse (ou toque) em um parágrafo para usar <span class="kbd">▍ Destacar</span> e <span class="kbd">✎ Anotar</span>. Tudo é salvo com suas respostas.</div>
-    <article class="traducao" data-integro="traducao">
-{{traducao}}
-    </article>
-  </section>
-
-  <section class="bloco-grande" id="material">
-    <header class="bloco-cab bloco-cab-b" data-integro="material-cab">
-      <span class="bloco-letra" data-atividade>B</span>
-      <div><span class="bloco-eyebrow" data-atividade>Material da aula</span><h2 class="bloco-titulo">{{titulo_m}}</h2>
-      <p class="bloco-sub">{{sub_m}}</p></div>
-    </header>
-    <div class="material" data-integro="material">
-      <div class="ficha">{{ficha}}</div>
-{{material}}
-    </div>
-  </section>
-
-  <section class="bloco-grande" id="minhas-respostas" data-atividade>
-    <header class="bloco-cab bloco-cab-c">
-      <span class="bloco-letra">✓</span>
-      <div><span class="bloco-eyebrow">Fechamento</span><h2 class="bloco-titulo">Minhas respostas</h2>
-      <p class="bloco-sub">Confira o que falta antes de encerrar a aula.</p></div>
-    </header>
-    <div class="resumo-respostas" aria-live="polite"></div>
-    <div class="barra-acoes">
+    <div class="barra-acoes" data-atividade>
+      <a class="vd-btn vd-btn-amarelo btn-continuar" href="#m-mapa-de-aprendizagem">Começar pelo módulo 1</a>
       <button type="button" class="vd-btn vd-btn-roxo btn-salvar" data-vd-salvar hidden>Salvar respostas</button>
       <button type="button" class="vd-btn vd-btn-ghost" onclick="window.print()">Imprimir / salvar em PDF</button>
       <a class="vd-btn vd-btn-ghost" href="../index.html">Voltar ao portal</a>
@@ -338,12 +414,13 @@ MODELO = r"""<!DOCTYPE html>
     <div class="vd-print-id"></div>
   </section>
 
+{{modulos}}
+
 </main>
 
 <button id="back-to-top" title="Voltar ao topo" aria-label="Voltar ao topo">&#8593;</button>
 <script src="../assets/js/config.js"></script>
 <script src="../assets/js/portal.js"></script>
-<script src="../assets/js/leitura.js"></script>
 <script src="../assets/js/vivelar.js"></script>
 <script src="../assets/js/parte.js"></script>
 <script>PARTE.iniciar({ id: 'aula{{n}}', titulo: 'Aula {{n}} · Parte I: Eficácia operacional não é estratégia', crumb: 'Aula {{n}} · Parte I' });</script>

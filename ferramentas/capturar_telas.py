@@ -27,27 +27,29 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 PORTA_SITE, PORTA_CDP = 8765, 9333
 
-CAPTURAS = [  # (nome, página, seletor, largura, altura)
+# (nome, página, alvo, largura, altura). O alvo é um id: na página da parte ele vai no endereço (#id),
+# e o próprio portal abre o módulo certo e rola até o ponto, como acontece com o estudante.
+CAPTURAS = [
     ("home", "/index.html", "", 1366, 1500),
-    ("home-porter", "/index.html", "#porter", 1366, 1300),
-    ("p1-topo", "/partes/parte-1.html", "", 1366, 1100),
-    ("p1-texto", "/partes/parte-1.html", "#p5", 1366, 1200),
-    ("p1-figura", "/partes/parte-1.html", "#figura-fronteira", 1366, 1300),
-    ("p1-quadro", "/partes/parte-1.html", "#quadro-japao", 1366, 1200),
-    ("p1-material", "/partes/parte-1.html", "#material", 1366, 1200),
-    ("p1-duvida", "/partes/parte-1.html", "#duvida-1-para-fazer-melhor-eu-nao-preciso-fazer-diferent", 1366, 1200),
-    ("p1-fronteira", "/partes/parte-1.html", "[data-widget=fronteira]", 1366, 1100),
-    ("p1-portfolio", "/partes/parte-1.html", "[data-widget=portfolio]", 1366, 1100),
-    ("p1-bsc", "/partes/parte-1.html", "#bsc-do-cenario-a-eficacia-operacional", 1366, 1200),
-    ("p1-simulador", "/partes/parte-1.html", "#simulador", 1366, 1500),
-    ("p1-exit", "/partes/parte-1.html", "#exit-ticket-5-min-individual", 1366, 1200),
-    ("p1-fim", "/partes/parte-1.html", "#minhas-respostas", 1366, 1000),
+    ("home-porter", "/index.html", "porter", 1366, 1300),
+    ("p1-indice", "/partes/parte-1.html", "", 1366, 1500),
+    ("p1-mapa", "/partes/parte-1.html", "m-mapa-de-aprendizagem", 1366, 1300),
+    ("p1-texto", "/partes/parte-1.html", "p5", 1366, 1200),
+    ("p1-figura", "/partes/parte-1.html", "figura-fronteira", 1366, 1300),
+    ("p1-bloco1", "/partes/parte-1.html", "m-bloco-1-definicoes", 1366, 1200),
+    ("p1-duvida", "/partes/parte-1.html", "duvida-1-para-fazer-melhor-eu-nao-preciso-fazer-diferent", 1366, 1200),
+    ("p1-esquema", "/partes/parte-1.html", "3-2-a-fronteira-em-um-esquema", 1366, 1300),
+    ("p1-fronteira", "/partes/parte-1.html", "3-5-exercicio-posicione-tres-empresas", 1366, 1300),
+    ("p1-bsc", "/partes/parte-1.html", "bsc-do-cenario-a-eficacia-operacional", 1366, 1200),
+    ("p1-simulador", "/partes/parte-1.html", "simulador", 1366, 1500),
+    ("p1-exit", "/partes/parte-1.html", "exit-ticket", 1366, 1300),
+    ("p1-fim-modulo", "/partes/parte-1.html", "referencias", 1366, 1100),
     ("m-home", "/index.html", "", 520, 2000),
-    ("m-home-porter", "/index.html", "#porter", 520, 2000),
-    ("m-p1-texto", "/partes/parte-1.html", "#p5", 520, 1600),
-    ("m-p1-fronteira", "/partes/parte-1.html", "[data-widget=fronteira]", 520, 1800),
-    ("m-p1-simulador", "/partes/parte-1.html", "#simulador", 520, 2600),
-    ("m-p1-tabela", "/partes/parte-1.html", "[id=\"7-6-resultados-financeiros\"]", 520, 1600),
+    ("m-p1-indice", "/partes/parte-1.html", "", 520, 2400),
+    ("m-p1-mapa", "/partes/parte-1.html", "m-mapa-de-aprendizagem", 520, 2000),
+    ("m-p1-texto", "/partes/parte-1.html", "p5", 520, 1600),
+    ("m-p1-esquema", "/partes/parte-1.html", "3-2-a-fronteira-em-um-esquema", 520, 1400),
+    ("m-p1-simulador", "/partes/parte-1.html", "simulador", 520, 2600),
 ]
 
 
@@ -130,6 +132,7 @@ def main(saida):
                 time.sleep(0.5)
         ws = WS(alvo["webSocketDebuggerUrl"])
         ws.cmd("Page.enable")
+        ws.cmd("Runtime.enable")   # sem isto, o headless às vezes não executa os scripts da página a tempo
         base = f"http://127.0.0.1:{PORTA_SITE}"
         ws.cmd("Page.navigate", url=base + "/index.html")
         time.sleep(1.5)
@@ -143,21 +146,30 @@ def main(saida):
             marca = str(random.randint(1, 10**9))
             ws.cmd("Page.navigate", url=base + pagina + "?x=" + marca)
             # espera a página e o portal.js terminarem (barra superior montada)
-            for _ in range(40):
-                pronto = ws.cmd("Runtime.evaluate", returnByValue=True, expression="location.search.indexOf('" + marca + "')>=0 && document.readyState==='complete' && !!document.querySelector('.vd-topbar') && document.fonts.status==='loaded'")
-                if pronto.get("result", {}).get("value"):
+            for k in range(80):
+                pronto = ws.cmd("Runtime.evaluate", returnByValue=True, expression="JSON.stringify([location.search.indexOf('" + marca + "')>=0, document.readyState, !!document.querySelector('.vd-topbar'), document.fonts.status])")
+                v = json.loads(pronto.get("result", {}).get("value") or "[false]")
+                if v[0] and v[1] == "complete" and v[2] and v[3] == "loaded":
                     break
+                if k in (20, 40, 60):   # o headless às vezes para no meio do carregamento: recarrega
+                    ws.cmd("Page.reload", ignoreCache=True)
                 time.sleep(0.25)
+            else:
+                print("  aviso: página não ficou pronta:", v)
+                rec = ws.cmd("Runtime.evaluate", returnByValue=True, expression="JSON.stringify(performance.getEntriesByType('resource').map(function(e){return e.name.split('/').slice(-1)[0].slice(0,40)+' '+Math.round(e.duration)}))")
+                print("  recursos carregados:", rec.get("result", {}).get("value"))
             time.sleep(0.6)
             if sel:
+                # na página da parte, quem abre o módulo e rola é o próprio portal (PARTE.abrir);
+                # nas demais, rola até o id sem animação
                 r = ws.cmd("Runtime.evaluate", returnByValue=True, expression=(
                     "(function(){document.documentElement.style.scrollBehavior='auto';"
-                    f"var el=document.querySelector({json.dumps(sel)}); if(!el) return 'sem alvo';"
-                    "var d=el.closest('details'); if(d) d.open=true;"
+                    f"var id={json.dumps(sel)}, el=document.getElementById(id); if(!el) return 'sem alvo';"
+                    "if (window.PARTE) { PARTE.abrir(id); return 'ok'; }"
                     "window.scrollTo({top: el.getBoundingClientRect().top + scrollY - 70, behavior:'instant'}); return 'ok';})()"))
                 if r.get("result", {}).get("value") != "ok":
-                    print(f"  aviso: {nome}: seletor {sel} não encontrado ({r})")
-                time.sleep(0.8)
+                    print(f"  aviso: {nome}: alvo {sel} não encontrado ({r})")
+                time.sleep(0.9)
             png = ws.cmd("Page.captureScreenshot", format="png")["data"]
             (saida / f"{nome}.png").write_bytes(base64.b64decode(png))
             print("OK ", nome)

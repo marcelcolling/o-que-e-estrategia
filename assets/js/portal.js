@@ -422,12 +422,12 @@
     var corpo = abrirModal(
       '<div class="vd-modal-eyebrow"><span class="vd-dot"></span>Guia rápido</div>' +
       '<h3>Como usar o portal</h3>' +
-      '<p>Cada aula corresponde a uma parte do artigo <em>What Is Strategy?</em> (Porter, 1996). Na página da aula você <strong>lê a tradução da parte</strong>, <strong>estuda o material da aula</strong> e <strong>responde às atividades</strong> no próprio texto.</p>' +
+      '<p>Cada aula corresponde a uma parte do artigo <em>What Is Strategy?</em> (Porter, 1996). Na página da aula você <strong>marca o seu mapa de aprendizagem</strong>, <strong>lê a tradução da parte</strong> e <strong>estuda o material</strong>, respondendo às atividades no próprio texto.</p>' +
       '<ol class="vd-guia">' +
         item('1', 'Entre com nome e palavra-chave',
           'Clique em <em>Entrar</em> e use o seu nome completo e uma palavra-chave de pelo menos 4 caracteres. No primeiro acesso, o portal pede para confirmar o cadastro e a turma. Não use uma senha pessoal.') +
         item('2', 'Leia de forma ativa',
-          'No texto de Porter, cada parágrafo tem os botões <strong>Destacar</strong> e <strong>Anotar</strong>. Entre um trecho e outro há <strong>pausas para responder</strong>. No material da aula, as caixas azuis com <strong>✎</strong> são atividades. Quando houver uma resposta esperada, escreva a sua antes de abri-la.') +
+          'A aula é dividida em <strong>módulos</strong>: abra um pelo índice e siga para o próximo pelo botão no fim da página. No texto de Porter, cada parágrafo tem os botões <strong>Destacar</strong> e <strong>Anotar</strong>. As caixas azuis com <strong>✎</strong> são atividades. Quando houver um comentário recolhido, escreva a sua resposta antes de abri-lo.') +
         item('3', 'O salvamento é automático',
           'Enquanto você escreve, as respostas são guardadas no navegador e enviadas à planilha da turma em poucos segundos. O indicador no topo mostra o estado: <span class="vd-cor ok">●</span> salvo na planilha, <span class="vd-cor pend">●</span> enviando, <span class="vd-cor erro">●</span> sem conexão (fica no navegador e o portal tenta de novo sozinho). O botão <strong>Salvar respostas</strong> envia na hora, se quiser garantir.') +
         item('4', 'Continue de qualquer computador',

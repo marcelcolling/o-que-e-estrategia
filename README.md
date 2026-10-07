@@ -1,10 +1,13 @@
 # Entendendo Porter: O que é estratégia?
 
-Portal da disciplina Execução Estratégica. Cada aula corresponde a uma parte do artigo *What Is Strategy?* (Michael E. Porter, Harvard Business Review, 1996). Na página da aula, o estudante:
+Portal da disciplina Execução Estratégica. Cada aula corresponde a uma parte do artigo *What Is Strategy?* (Michael E. Porter, Harvard Business Review, 1996). A página da aula abre num índice de módulos, que o estudante percorre um de cada vez:
 
-1. **lê a tradução da parte**, com botões para destacar e anotar cada parágrafo e pausas para responder ao texto;
-2. **estuda o material da aula**, com o seu texto na íntegra e as atividades encaixadas nos pontos certos (as respostas esperadas ficam recolhidas até ele responder);
-3. **pratica no caso Vivelar**, com um simulador que refaz as contas do Apêndice A e um registro de experimentos, e fecha com o exit ticket.
+1. **Mapa de aprendizagem:** marca, em cada objetivo, se domina, domina parcialmente ou ainda não domina, com uma anotação opcional;
+2. **Texto de Porter:** a tradução da parte, com botões para destacar e anotar cada parágrafo e pausas para responder;
+3. **Abertura, Blocos 1 a 7 e Fechamento:** o material da aula, escrito para o estudante, com as atividades no próprio texto (os comentários ficam recolhidos até ele responder), o caso Vivelar com simulador e o exit ticket;
+4. **Para consulta:** como a simulação funciona, armadilhas comuns e referências.
+
+O material publicado é a versão revisada (`conteudo/aula-1-material-estudante.md`). O seu original (`conteudo/aula-1-material.md`) fica guardado como referência.
 
 As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Google, alguns segundos depois.
 
