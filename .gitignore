@@ -1,0 +1,4 @@
+# Fontes de referência: ficam só na pasta local (OneDrive), não vão para o GitHub
+conteudo/
+*.pdf
+__pycache__/

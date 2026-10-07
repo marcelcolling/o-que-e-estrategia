@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>teste</title></head>
+<body>
+<pre id="log">rodando</pre>
+<iframe id="fr" style="width:1200px;height:900px"></iframe>
+<script>
+const log = [];
+const ok = (c, m) => { log.push((c ? 'PASS ' : 'FAIL ') + m); document.getElementById('log').textContent = log.join('\n') + '\n(em andamento)'; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fr = document.getElementById('fr');
+const carregar = url => new Promise(r => { fr.onload = () => r(fr.contentWindow); fr.src = url; });
+const estado = async () => (await fetch('/__estado')).json();
+const P1 = '/partes/parte-1.html';
+const XSS = '<img src=x onerror="window.__xss=1">';
+const q = (w, s) => w.document.querySelector(s);
+const campo = (w, k) => q(w, '[data-campo="' + k + '"]');
+const digitar = (w, el, v) => { el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
+const marcar = (w, k, v) => { const r = q(w, 'input[data-campo="' + k + '"][value="' + v + '"]'); r.checked = true; r.dispatchEvent(new w.Event('change', { bubbles: true })); r.dispatchEvent(new w.Event('click', { bubbles: true })); };
+const r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
+
+(async () => {
+  try {
+    localStorage.clear();
+    // o outro portal (Vieses e Decisão) fica no mesmo domínio: a sessão dele não pode vazar para cá
+    localStorage.setItem('vd_sessao_v1', JSON.stringify({ id: 'outro', nome: 'Outro Portal', modo: 'planilha', chave: 'x' }));
+    localStorage.setItem('vd_dados_v1::outro', JSON.stringify({ aula1: { data: { equipe: 'x' } } }));
+    let w = await carregar(P1);
+    await sleep(1500);
+    ok(!w.VD.sessao(), 'a sessão do portal Vieses e Decisão não é reaproveitada (prefixo próprio no navegador)');
+    ok(!q(w, '.vd-modal').hidden, 'sem sessão, o modal de login abre');
+    ok(w.document.querySelectorAll('.par').length === 22 && w.document.querySelectorAll('.ativ-pausa').length === 5, 'tradução com 22 parágrafos e 5 pausas para responder');
+
+    /* ---- modelo da Vivelar: números do material (7.6 a 7.8) ---- */
+    const S = w.VIVELAR.simular({}), K = S.k;
+    const tab = { 6: [6.4, 3.8, 1.5], 12: [12.5, 11.2, 6.8], 18: [17.7, 17.6, 13.4], 24: [22.6, 23.7, 20.9], 30: [27.3, 29.8, 28.8], 36: [32.0, 35.9, 36.8] };
+    let difs = [];
+    Object.keys(tab).forEach(m => ['Z', 'A', 'B'].forEach((c, i) => { if (r1(S.acum[c][m - 1]) !== tab[m][i]) difs.push(c + m + '=' + r1(S.acum[c][m - 1])); }));
+    ok(!difs.length, 'simulador reproduz o EBITDA acumulado da tabela 7.6 ' + (difs.join(' ') || '(18 valores)'));
+    ok(r2(K.Z.m36) === 0.78 && r2(K.A.m36) === 1.02 && r2(K.B.m36) === 1.33, 'EBITDA mensal no mês 36: 0,78 / 1,02 / 1,33');
+    ok(r1(K.Z.sh18 * 100) === 7.5 && r1(K.A.sh18 * 100) === 8.0 && r1(K.B.sh18 * 100) === 8.8 && r1(K.Z.sh36 * 100) === 7.3 && r1(K.B.sh36 * 100) === 9.6, 'participação de mercado nos meses 18 e 36');
+    ok([K.Z.vp36, K.A.vp36, K.B.vp36].map(r1).join() === '26.4,29,28.6' && [K.Z.vp48, K.A.vp48, K.B.vp48].map(r1).join() === '32.1,36.4,38.4', 'valor presente em 36 e 48 meses: ' + [K.Z.vp36, K.A.vp36, K.B.vp36, K.Z.vp48, K.A.vp48, K.B.vp48].map(r1).join(' / '));
+    ok(S.cruz.AZ === 19 && S.cruz.BZ === 28 && S.cruz.BA === 34, 'cruzamentos nos meses 19, 28 e 34');
+    const Si = w.VIVELAR.simular({ imitacao: 19 }), Sl = w.VIVELAR.simular({ fimRampa: 36 });
+    ok(r1(Si.k.B.ac36) === 31.8 && r2(Si.k.B.m36) === 0.93 && Si.cruz.BA === null, 'sensibilidade "B com imitação": 31,8 · 0,93 · nunca supera A');
+    ok(r1(Sl.k.B.ac36) === 33.2 && r2(Sl.k.B.m36) === 1.33 && Sl.cruz.BA === 45, 'sensibilidade "B com rampa lenta": 33,2 · 1,33 · mês 45');
+
+    /* ---- rascunho anônimo, cadastro ---- */
+    digitar(w, campo(w, 'prep_iniciativa'), 'Implantação de CRM');
+    await sleep(1500);
+    ok(q(w, '.vd-status').textContent.includes('navegador'), 'rascunho anônimo salvo no navegador');
+    let r = await w.VD.entrar({ nome: 'Teste  Porter', chave: 'abcd' });
+    ok(r.naoEncontrado, 'nome novo pede confirmação de cadastro');
+    r = await w.VD.entrar({ nome: 'Teste Porter', chave: 'abcd', turma: 'T1', criar: true });
+    ok(r.ok && r.criado, 'cadastro criado');
+    await sleep(12000);
+    let est = await estado();
+    ok(JSON.stringify(est.dados).includes('Implantação de CRM'), 'rascunho anônimo adotado e enviado à planilha');
+
+    /* ---- preencher as atividades ---- */
+    marcar(w, 'prep_efeito', 'melhor');
+    marcar(w, 'b1_checagem_tipo', 'EO');
+    digitar(w, campo(w, 'b1_checagem'), 'Faz melhor a mesma atividade');
+    digitar(w, campo(w, 't_q2'), 'EO é fazer melhor; posição é fazer diferente');
+    digitar(w, campo(w, 'b2_duvida1'), 'Não se sobrepõem');
+    // destacar e anotar
+    q(w, '#p3 .b-dest').click();
+    q(w, '#p8 .b-nota').click();
+    ok(!q(w, '#p8 .par-nota').hidden, 'botão Anotar abre a anotação do parágrafo');
+    digitar(w, q(w, '#p8 textarea[data-nota]'), 'Definição central do artigo');
+    // fronteira
+    const fc = q(w, '.fr-cartao[data-i="0"]');
+    digitar(w, fc.querySelector('.fr-nome'), 'Azul ' + XSS);
+    digitar(w, fc.querySelector('.fr-custo'), '80');
+    digitar(w, fc.querySelector('.fr-valor'), '60');
+    digitar(w, fc.querySelector('.fr-just'), 'Malha regional');
+    ok(fc.querySelector('.fr-status').textContent.includes('fronteira'), 'fronteira mostra o diagnóstico da empresa');
+    // portfólio
+    const pl = q(w, '.pf-linha[data-i="0"]');
+    digitar(w, pl.querySelector('.pf-nome'), 'Novo ERP ' + XSS);
+    pl.querySelector('.pf-cat').value = 'paridade'; pl.querySelector('.pf-cat').dispatchEvent(new w.Event('change', { bubbles: true }));
+    await sleep(100);
+    ok(q(w, '.pf-leg').textContent.includes('EO de paridade 1 (100%)'), 'portfólio mostra a proporção por categoria');
+    // troca de logo
+    const ll = q(w, '.lg-linha[data-i="1"]');
+    digitar(w, ll.querySelector('.lg-obj'), 'Ser referência no varejo independente');
+    const nao = ll.querySelector('input[value="nao"]'); nao.checked = true; nao.dispatchEvent(new w.Event('change', { bubbles: true }));
+    ok(q(w, '.lg-veredito').textContent.includes('Nenhum sobrevive'), 'teste da troca de logo dá o veredito');
+    // simulador
+    const ctl = q(w, '.sim-ctl[data-k="perda"] input');
+    digitar(w, ctl, '25');
+    await sleep(100);
+    ok(q(w, '.sim-ctl[data-k="perda"]').classList.contains('mudou') && q(w, '.sim-tab').textContent.includes('material:'), 'simulador recalcula e marca a premissa alterada');
+    q(w, '.sim-reg-btn').click();
+    await sleep(100);
+    digitar(w, q(w, '.sim-exp-txt'), 'Com perda maior, B demora mais ' + XSS);
+    q(w, '.sim-preset[data-i="1"]').click();
+    ok(q(w, '.sim-cruz').textContent.includes('B supera A: nunca'), 'cenário pronto "B com imitação" na tela');
+    // exit ticket: trazer da preparação e comparar
+    q(w, '[data-trazer]').click();
+    ok(campo(w, 'exit_iniciativa').value === 'Implantação de CRM', 'exit ticket traz a iniciativa da preparação');
+    marcar(w, 'exit_classe', 'c');
+    await sleep(400);
+    ok(q(w, '.exit-compara').textContent.includes('não combinam'), 'exit ticket compara com a preparação');
+    ok(!w.__xss && !w.document.querySelector('img[src="x"]'), 'texto do estudante é escapado (nenhum HTML injetado)');
+    await sleep(14000);
+    est = await estado();
+    const reg = est.dados['teste porter|aula1'];
+    const res = reg ? JSON.stringify(reg.resumo) : '';
+    ok(reg && reg.json.includes('Definição central'), 'respostas da Aula 1 salvas na planilha');
+    ok(res.includes('Faz melhor a mesma atividade') && res.includes('Eficácia operacional') && res.includes('Bloco 1'), 'resumo legível com seção, pergunta e resposta');
+    ok(res.includes('§8') && res.includes('[destacado]'), 'resumo inclui anotações e destaques nos parágrafos');
+    ok(res.includes('Empresa 1') && res.includes('Iniciativa 1') && res.includes('Experimento 1') && res.includes('Perda de volume nas redes em B: 25'), 'resumo inclui fronteira, portfólio e experimentos do simulador');
+    ok(q(w, '.vd-status').textContent.includes('Salvo na planilha'), 'indicador mostra "Salvo na planilha" (' + q(w, '.vd-status').textContent + ')');
+    ok(q(w, '.sp-txt').textContent.match(/^\d+ de \d+ respostas$/) && q(w, '.rr-num strong').textContent !== '0', 'progresso na barra lateral e em "Minhas respostas": ' + q(w, '.sp-txt').textContent);
+
+    /* ---- caixa que cresce, botão Salvar ---- */
+    const ta = campo(w, 'b6_executar');
+    const h0 = ta.offsetHeight;
+    digitar(w, ta, 'linha\n'.repeat(15) + 'fim');
+    await sleep(100);
+    ok(ta.offsetHeight > h0 + 100, 'caixa de texto cresce com o conteúdo (' + h0 + 'px → ' + ta.offsetHeight + 'px)');
+    q(w, '.barra-acoes [data-vd-salvar]').click();
+    await sleep(3000);
+    est = await estado();
+    ok(est.dados['teste porter|aula1'].json.includes('linha\\nlinha'), 'botão "Salvar respostas" grava na planilha na hora');
+    ok(q(w, '.vd-toast').textContent.includes('salvas na planilha'), 'confirmação após salvar: "' + q(w, '.vd-toast').textContent + '"');
+
+    r = await w.VD.entrar({ nome: 'teste porter', chave: 'errada' });
+    ok(r.chaveIncorreta, 'palavra-chave errada é recusada');
+
+    /* ---- outro computador ---- */
+    localStorage.clear();
+    w = await carregar(P1);
+    await sleep(800);
+    r = await w.VD.entrar({ nome: 'TESTE PORTER', chave: 'ABCD' });
+    await sleep(1200);
+    ok(r.ok && campo(w, 'prep_iniciativa').value === 'Implantação de CRM' && q(w, 'input[data-campo="b1_checagem_tipo"][value="EO"]').checked, 'em outro computador, as respostas voltam da planilha');
+    ok(q(w, '#p3').classList.contains('destacado') && q(w, '#p8 textarea[data-nota]').value === 'Definição central do artigo' && !q(w, '#p8 .par-nota').hidden, 'destaques e anotações voltam');
+    ok(q(w, '.fr-cartao[data-i="0"] .fr-nome').value.startsWith('Azul') && q(w, '.pf-linha .pf-cat').value === 'paridade', 'fronteira e portfólio voltam');
+    ok(q(w, '.sim-exp-txt') && q(w, '.sim-exp-txt').value.startsWith('Com perda maior') && q(w, '.sim-ctl[data-k="imitacao"] select').value === '19', 'simulador volta com o experimento e as premissas');
+    ok(!w.__xss && !w.document.querySelector('img[src="x"]'), 'dados recarregados continuam escapados');
+
+    /* ---- conflito (mesma aula aberta em dois lugares) ---- */
+    await fetch('/__mexer');
+    digitar(w, campo(w, 'b5_fixacao'), 'Estava abaixo da fronteira');
+    await sleep(14000);
+    const corpo = q(w, '.vd-modal-corpo');
+    ok(!q(w, '.vd-modal').hidden && corpo.textContent.includes('versão mais nova'), 'conflito entre duas versões é detectado');
+    corpo.querySelector('[data-a=carregar]').click();
+    await sleep(500);
+    ok(campo(w, 'b1_checagem').value === 'ALTERADO POR OUTRO', 'opção "carregar a versão da planilha" funciona');
+
+    /* ---- home ---- */
+    w = await carregar('/index.html');
+    await sleep(2000);
+    const card = w.document.getElementById('sessaoCard').textContent;
+    ok(card.includes('Teste Porter') && card.includes('Salva'), 'home mostra o progresso do estudante');
+    ok(q(w, '[data-ferramenta="aula1"]').textContent.includes('✓'), 'home marca a Aula 1 como iniciada');
+    ok(w.document.querySelectorAll('.fase').length === 7 && q(w, '.obras li.destaque').textContent.includes('What Is Strategy'), 'seção "Quem é Michael Porter" com as fases e o artigo em destaque');
+    ok(!w.document.querySelector('a[href$=".pdf"]'), 'nenhum link para PDF');
+    w.VD.sair();
+    await sleep(300);
+    ok(!w.VD.sessao(), 'sair encerra a sessão');
+  } catch (e) {
+    log.push('ERRO ' + e.message + ' ' + e.stack);
+  }
+  document.getElementById('log').textContent = log.join('\n');
+  document.title = 'FIM';
+})();
+</script>
+</body></html>

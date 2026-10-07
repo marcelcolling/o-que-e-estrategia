@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entendendo Porter — O que é estratégia?</title>
+<meta name="description" content="Leitura guiada do artigo What Is Strategy?, de Michael E. Porter (1996): tradução, material da aula e atividades, parte por parte.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/portal.css">
+<style>
+  :root {
+    --roxo:#1F3A5F; --roxo-deep:#152A45; --roxo-noite:#0E1D31; --azul:#455066; --azul-tint:rgba(69,80,102,0.09);
+    --papel:#FCFCFA; --papel-dim:#EFEEE7; --linha:rgba(31,58,95,0.14);
+    --amarelo:#EFB93C; --amarelo-ink:#5B4212; --texto:#1E2733; --muted:#5E6878; --ok:#2f8f5f;
+    --display:'Fraunces', Georgia, serif; --body:'Inter', -apple-system, sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; scroll-padding-top:70px; }
+  body { margin:0; font-family:var(--body); background:var(--papel); color:var(--texto); line-height:1.6; overflow-x:hidden; }
+  a { color:inherit; }
+  ::selection { background:var(--amarelo); color:var(--roxo-deep); }
+  .wrap { max-width:var(--vd-largura); margin:0 auto; padding:0 1.5rem; }
+
+  /* ================= PRIMEIRA DOBRA ================= */
+  .hero { background:var(--roxo); color:#fff; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; right:-140px; top:-160px; width:460px; height:460px; border-radius:50%; border:2px solid rgba(239,185,60,0.2); }
+  .hero-grid { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; align-items:center; padding-top:clamp(2.2rem,5vw,3.2rem); padding-bottom:clamp(2rem,4vw,2.8rem); position:relative; z-index:1; }
+  .tag { display:inline-flex; align-items:center; gap:0.55rem; border:1px solid rgba(239,185,60,0.5); color:var(--amarelo); font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.35rem 0.95rem; border-radius:100px; font-weight:600; }
+  .tag i { width:8px; height:8px; border-radius:50%; background:var(--amarelo); display:inline-block; }
+  .hero h1 { font-family:var(--display); font-weight:700; font-size:clamp(2.5rem,5.4vw,4rem); line-height:1.02; margin:1.1rem 0 0.9rem; letter-spacing:-0.01em; }
+  .hero h1 em { display:block; font-style:italic; font-weight:500; color:var(--amarelo); font-size:0.62em; margin-top:0.35rem; }
+  .hero-sub { font-family:var(--display); font-style:italic; font-size:clamp(1.05rem,1.8vw,1.25rem); color:rgba(255,255,255,0.82); max-width:52ch; margin:0; line-height:1.5; }
+  .hero-links { display:flex; gap:1.2rem; flex-wrap:wrap; margin-top:1.3rem; font-size:0.88rem; }
+  .hero-links a { color:var(--amarelo); font-weight:600; text-decoration:none; border-bottom:1px solid rgba(239,185,60,0.45); }
+  .hero-links a:hover { border-bottom-color:var(--amarelo); }
+
+  .sessao-card { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.16); border-radius:20px; padding:1.5rem 1.6rem; }
+  .sessao-card .eyebrow { font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--amarelo); margin-bottom:0.5rem; }
+  .sessao-card h2 { font-family:var(--display); font-weight:600; font-size:1.4rem; margin:0 0 0.45rem; line-height:1.2; }
+  .sessao-card p { font-size:0.88rem; color:rgba(255,255,255,0.78); margin:0 0 1.1rem; line-height:1.6; }
+  .sessao-card .vd-btn { padding:0.7rem 1.15rem; font-size:0.88rem; }
+  .progresso { list-style:none; margin:0 0 1.1rem; padding:0; display:flex; flex-direction:column; gap:0.4rem; }
+  .progresso li { display:flex; justify-content:space-between; gap:1rem; font-size:0.84rem; background:rgba(255,255,255,0.06); border-radius:10px; padding:0.5rem 0.8rem; }
+  .progresso li span:last-child { color:rgba(255,255,255,0.7); white-space:nowrap; }
+  .progresso li.feito span:last-child { color:#8fe0b6; }
+  .sessao-acoes { display:flex; gap:0.6rem; flex-wrap:wrap; }
+
+  /* faixa do artigo */
+  .faixa { background:var(--roxo-noite); position:relative; z-index:1; padding:1.4rem 0 1.5rem; border-top:1px solid rgba(255,255,255,0.08); color:#fff; }
+  .faixa-grid { display:grid; grid-template-columns:auto 1fr; gap:1rem 2rem; align-items:center; }
+  .faixa-ref { font-family:var(--display); font-size:1.15rem; }
+  .faixa-ref em { color:var(--amarelo); }
+  .faixa-ref small { display:block; font-family:var(--body); font-size:0.78rem; color:rgba(255,255,255,0.6); margin-top:0.15rem; }
+  .faixa p { margin:0; color:rgba(255,255,255,0.72); font-size:0.9rem; max-width:80ch; }
+
+  /* ================= SEÇÕES ================= */
+  section.bloco { padding:clamp(3rem,6vw,4.4rem) 0; }
+  section.bloco + section.bloco { border-top:1px solid var(--linha); }
+  .trilha-topo { display:flex; justify-content:space-between; align-items:flex-end; gap:1.5rem 3rem; flex-wrap:wrap; margin-bottom:2.2rem; }
+  .eyebrow-sec { display:flex; align-items:center; gap:0.6rem; font-size:0.76rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--amarelo-ink); margin-bottom:0.7rem; }
+  .eyebrow-sec i { width:8px; height:8px; border-radius:50%; border:2px solid var(--amarelo); display:inline-block; }
+  h2.titulo-sec { font-family:var(--display); font-weight:600; font-size:clamp(1.8rem,3.6vw,2.4rem); color:var(--roxo); margin:0 0 0.6rem; line-height:1.12; }
+  p.intro-sec { color:var(--azul); font-size:1rem; max-width:78ch; margin:0; line-height:1.7; }
+  .legenda { display:flex; gap:0.7rem; flex-wrap:wrap; }
+  .legenda span { display:inline-flex; align-items:center; gap:0.5rem; font-size:0.8rem; font-weight:600; color:var(--texto); border-radius:100px; padding:0.4rem 0.85rem 0.4rem 0.45rem; }
+  .legenda .lg-leitura { background:#fff; border:1px solid var(--linha); }
+  .legenda .lg-atividade { background:var(--roxo); color:#fff; }
+  .legenda b { width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
+  .legenda .lg-leitura b { background:var(--azul-tint); color:var(--azul); }
+  .legenda .lg-atividade b { background:rgba(255,255,255,0.14); color:var(--amarelo); }
+
+  .etapas { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:1rem; }
+  .etapa { display:flex; flex-direction:column; min-width:0; }
+  .marco { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.9rem; position:relative; }
+  .marco-n { width:44px; height:44px; border-radius:50%; background:var(--roxo); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--display); font-weight:700; font-size:1.05rem; flex-shrink:0; position:relative; z-index:1; box-shadow:0 0 0 5px var(--papel); }
+  .marco-fase { font-size:0.7rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--roxo); background:var(--papel); position:relative; z-index:1; padding-right:0.5rem; }
+  .etapa:not(:last-child) .marco::after { content:''; position:absolute; left:44px; right:-1rem; top:50%; height:2px; background:var(--roxo); opacity:0.25; }
+  .etapa.futura .marco-n { background:var(--papel-dim); color:var(--azul); border:2px dashed rgba(69,80,102,0.4); box-shadow:0 0 0 5px var(--papel); }
+  .etapa.futura .marco-fase { color:var(--muted); }
+
+  .etapa-card { flex:1; display:flex; flex-direction:column; background:#fff; border:1px solid var(--linha); border-radius:18px; padding:1.2rem 1.05rem 1.05rem; transition:border-color .2s, box-shadow .2s; }
+  .etapa-card:hover { border-color:rgba(31,58,95,0.3); box-shadow:0 18px 40px -28px rgba(21,42,69,0.45); }
+  .etapa.futura .etapa-card { background:transparent; border-style:dashed; }
+  .etapa-aula { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--amarelo-ink); }
+  .badge-breve { font-size:0.64rem; letter-spacing:0.06em; padding:0.22rem 0.6rem; border-radius:100px; background:var(--papel-dim); color:var(--azul); }
+  .etapa h3 { font-family:var(--display); font-weight:600; font-size:1.18rem; color:var(--roxo); margin:0.45rem 0 0.55rem; line-height:1.25; }
+  .etapa p.desc { font-size:0.87rem; color:var(--azul); margin:0 0 0.8rem; line-height:1.6; }
+  .etapa p.entrega { font-size:0.8rem; color:var(--muted); margin:0 0 1.1rem; line-height:1.5; padding-top:0.7rem; border-top:1px dashed var(--linha); }
+  .etapa p.entrega strong { color:var(--texto); font-weight:600; }
+  .recursos { margin-top:auto; display:flex; flex-direction:column; gap:0.6rem; }
+
+  .rec { display:flex; flex-direction:column; gap:0.45rem; text-decoration:none; border-radius:14px; padding:0.8rem 0.9rem 0.85rem; transition:transform .15s, box-shadow .15s, background .15s, border-color .15s; }
+  .rec:focus-visible { outline:3px solid var(--amarelo); outline-offset:2px; }
+  .rec-cab { display:flex; align-items:center; gap:0.55rem; }
+  .rec-ico { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .rec-ico svg { width:15px; height:15px; }
+  .rec-tipo { display:block; font-size:0.64rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; }
+  .rec-nome { display:block; font-weight:600; font-size:0.9rem; line-height:1.32; }
+  .rec-status { display:block; font-size:0.74rem; margin-top:-0.15rem; }
+  .rec-leitura { background:var(--papel); border:1.5px solid var(--linha); color:var(--texto); }
+  .rec-leitura .rec-ico { background:var(--azul-tint); color:var(--azul); }
+  .rec-leitura .rec-tipo { color:var(--azul); }
+  .rec-leitura:hover { border-color:var(--azul); background:#fff; transform:translateY(-1px); }
+  .rec-atividade { background:var(--roxo); border:1.5px solid var(--roxo); color:#fff; box-shadow:0 10px 24px -16px rgba(21,42,69,0.8); }
+  .rec-atividade .rec-ico { background:rgba(255,255,255,0.12); color:var(--amarelo); }
+  .rec-atividade .rec-tipo { color:var(--amarelo); }
+  .rec-atividade .rec-status { color:rgba(255,255,255,0.72); }
+  .rec-atividade .rec-status.feito { color:#8fe0b6; font-weight:600; }
+  .rec-atividade:hover { background:var(--roxo-deep); transform:translateY(-1px); }
+
+  /* ================= QUEM É MICHAEL PORTER ================= */
+  .porter-grid { display:grid; grid-template-columns:minmax(0,0.9fr) minmax(0,1.6fr); gap:2.2rem; align-items:start; }
+  .bio { background:var(--roxo); color:#fff; border-radius:22px; padding:1.8rem 1.8rem 1.6rem; position:sticky; top:80px; overflow:hidden; }
+  .bio::after { content:''; position:absolute; bottom:-70px; right:-60px; width:200px; height:200px; border-radius:50%; border:2px solid rgba(239,185,60,0.25); }
+  .bio-mono { width:72px; height:72px; border-radius:50%; border:2px solid var(--amarelo); color:var(--amarelo); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-weight:700; font-size:1.6rem; margin-bottom:1rem; }
+  .bio h3 { font-family:var(--display); font-weight:700; font-size:1.7rem; margin:0 0 0.2rem; }
+  .bio .bio-cargo { font-family:var(--display); font-style:italic; color:rgba(255,255,255,0.8); margin:0 0 1.1rem; font-size:1rem; line-height:1.45; }
+  .bio p { font-size:0.9rem; color:rgba(255,255,255,0.82); line-height:1.65; margin:0 0 0.9rem; }
+  .bio p strong { color:#fff; }
+  .bio dl { margin:1.2rem 0 0; display:grid; grid-template-columns:auto 1fr; gap:0.45rem 0.9rem; font-size:0.84rem; position:relative; z-index:1; }
+  .bio dt { color:var(--amarelo); font-weight:700; white-space:nowrap; }
+  .bio dd { margin:0; color:rgba(255,255,255,0.85); }
+  .ideias { display:flex; flex-wrap:wrap; gap:0.45rem; margin-top:1.1rem; position:relative; z-index:1; }
+  .ideias span { font-size:0.74rem; font-weight:600; border:1px solid rgba(255,255,255,0.25); border-radius:100px; padding:0.25rem 0.7rem; }
+  .fases { display:flex; flex-direction:column; gap:1rem; }
+  .fase { background:#fff; border:1px solid var(--linha); border-radius:18px; padding:1.25rem 1.35rem; }
+  .fase-cab { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:0.3rem; }
+  .fase h3 { font-family:var(--display); font-weight:600; font-size:1.2rem; color:var(--roxo); margin:0; }
+  .fase-anos { font-size:0.74rem; font-weight:700; letter-spacing:0.08em; color:var(--amarelo-ink); background:rgba(239,185,60,0.18); border-radius:100px; padding:0.2rem 0.65rem; white-space:nowrap; }
+  .fase > p { font-size:0.88rem; color:var(--azul); margin:0 0 0.8rem; line-height:1.6; }
+  .obras { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .obras li { display:grid; grid-template-columns:52px 64px minmax(0,1fr); gap:0.7rem; align-items:baseline; padding:0.5rem 0; border-top:1px dashed var(--linha); font-size:0.88rem; color:var(--texto); line-height:1.5; }
+  .obras .ano { font-family:var(--display); font-weight:700; color:var(--roxo); }
+  .obras .tipo { font-size:0.62rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; border-radius:100px; padding:0.15rem 0.5rem; text-align:center; align-self:center; }
+  .obras .tipo.livro { background:var(--roxo); color:#fff; }
+  .obras .tipo.artigo { background:var(--azul-tint); color:var(--azul); }
+  .obras em { font-style:italic; font-weight:600; }
+  .obras small { display:block; color:var(--muted); font-size:0.8rem; }
+  .obras li.destaque { background:rgba(239,185,60,0.14); border-radius:10px; border-top-color:transparent; padding-left:0.5rem; padding-right:0.5rem; }
+  .obras li.destaque small { color:var(--amarelo-ink); font-weight:600; }
+  .nota-obras { font-size:0.8rem; color:var(--muted); margin-top:1rem; }
+
+  footer { background:var(--roxo-deep); color:rgba(255,255,255,0.6); font-size:0.82rem; padding:2rem 0; }
+  footer .wrap { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:center; }
+  footer strong { color:#fff; font-family:var(--display); font-weight:600; }
+  footer button { background:none; border:none; color:var(--amarelo); font:inherit; font-weight:600; cursor:pointer; padding:0; text-decoration:underline; }
+
+  /* ================= RESPONSIVO ================= */
+  @media (max-width:1100px) {
+    .etapas { grid-template-columns:1fr; gap:1.2rem; position:relative; }
+    .etapas::before { content:''; position:absolute; left:21px; top:22px; bottom:22px; width:2px; background:var(--roxo); opacity:0.2; }
+    .etapa { display:grid; grid-template-columns:44px 1fr; gap:1rem; }
+    .marco { flex-direction:column; margin:0; }
+    .marco-fase { display:none; }
+    .etapa:not(:last-child) .marco::after { display:none; }
+    .etapa-card .etapa-aula::after { content:attr(data-fase); color:var(--muted); letter-spacing:0.12em; }
+    .recursos { flex-direction:row; flex-wrap:wrap; }
+    .rec { flex:1 1 220px; }
+  }
+  @media (max-width:880px) {
+    .hero-grid, .porter-grid, .faixa-grid { grid-template-columns:1fr; gap:1.6rem; }
+    .bio { position:static; }
+  }
+  @media (max-width:560px) {
+    .wrap { padding-left:1rem; padding-right:1rem; }
+    .etapas::before { left:17px; }
+    .etapa { grid-template-columns:36px 1fr; gap:0.75rem; }
+    .marco-n { width:36px; height:36px; font-size:0.9rem; box-shadow:0 0 0 4px var(--papel); }
+    .etapa-card { padding:1.1rem 1rem; }
+    .obras li { grid-template-columns:44px minmax(0,1fr); }
+    .obras .tipo { grid-column:2; justify-self:start; }
+    .obras li > span:last-child { grid-column:1 / -1; }
+    .bio { padding:1.4rem 1.2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .rec, .etapa-card { transition:none; } html { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="tag"><i></i><span id="programa">Execução Estratégica</span></span>
+      <h1>Entendendo Porter <em>O que é estratégia?</em></h1>
+      <p class="hero-sub">Uma leitura guiada do artigo de Michael E. Porter, parte por parte: o texto traduzido, o material da aula e as atividades no próprio texto.</p>
+      <div class="hero-links"><a href="#trilha">Ver as cinco partes</a><a href="#porter">Quem é Michael Porter</a></div>
+    </div>
+    <div class="sessao-card" id="sessaoCard" aria-live="polite"></div>
+  </div>
+  <div class="faixa">
+    <div class="wrap faixa-grid">
+      <div class="faixa-ref"><em>What Is Strategy?</em><small>Harvard Business Review · novembro–dezembro de 1996</small></div>
+      <p>O artigo distingue <strong style="color:#fff">eficácia operacional</strong> de <strong style="color:#fff">estratégia</strong> e mostra por que uma posição só se sustenta com escolhas, renúncias e encaixe entre atividades. Cada parte do artigo é uma aula.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="bloco" id="trilha">
+    <div class="wrap">
+      <div class="trilha-topo">
+        <div>
+          <div class="eyebrow-sec"><i></i>A trilha da disciplina</div>
+          <h2 class="titulo-sec">Cinco partes, cinco aulas</h2>
+          <p class="intro-sec">Em cada aula você lê a tradução de uma parte do artigo, estuda o material e responde às atividades na mesma página. Tudo é salvo automaticamente enquanto você escreve.</p>
+        </div>
+        <div class="legenda" aria-label="Legenda">
+          <span class="lg-leitura"><b aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg></b>Leitura</span>
+          <span class="lg-atividade"><b aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></b>Atividade</span>
+        </div>
+      </div>
+
+      <ol class="etapas">
+        <li class="etapa">
+          <div class="marco"><span class="marco-n">I</span><span class="marco-fase">pp. 37–40</span></div>
+          <article class="etapa-card">
+            <div class="etapa-aula" data-fase=" · pp. 37–40">Aula 1</div>
+            <h3>Eficácia operacional não é estratégia</h3>
+            <p class="desc">Por que fazer melhor o que todos fazem é necessário, mas raramente basta: a fronteira de produtividade, a difusão das melhores práticas e a convergência competitiva.</p>
+            <p class="entrega"><strong>Entrega:</strong> atividades da aula, caso Vivelar com simulador e exit ticket.</p>
+            <div class="recursos">
+              <a class="rec rec-leitura" href="partes/parte-1.html#texto">
+                <span class="rec-cab"><span class="rec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg></span><span class="rec-tipo">Leitura · ~11 min</span></span><span class="rec-nome">Texto de Porter: tradução da Parte I</span></a>
+              <a class="rec rec-leitura" href="partes/parte-1.html#material">
+                <span class="rec-cab"><span class="rec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg></span><span class="rec-tipo">Leitura · ~47 min</span></span><span class="rec-nome">Material da aula</span></a>
+              <a class="rec rec-atividade" href="partes/parte-1.html">
+                <span class="rec-cab"><span class="rec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></span><span class="rec-tipo">Atividade</span></span><span class="rec-nome">Atividades da Aula 1 e simulador Vivelar</span><span class="rec-status" data-ferramenta="aula1">Não iniciada</span></a>
+            </div>
+          </article>
+        </li>
+
+        <li class="etapa futura">
+          <div class="marco"><span class="marco-n">II</span><span class="marco-fase">pp. 39–43</span></div>
+          <article class="etapa-card">
+            <div class="etapa-aula" data-fase=" · pp. 39–43">Aula 2 <span class="badge-breve">Em breve</span></div>
+            <h3>A estratégia se apoia em atividades únicas</h3>
+            <p class="desc">O que torna uma posição única e valiosa, e as três origens das posições estratégicas: variedade, necessidades e acesso.</p>
+          </article>
+        </li>
+
+        <li class="etapa futura">
+          <div class="marco"><span class="marco-n">III</span><span class="marco-fase">pp. 43–45</span></div>
+          <article class="etapa-card">
+            <div class="etapa-aula" data-fase=" · pp. 43–45">Aula 3 <span class="badge-breve">Em breve</span></div>
+            <h3>Uma posição sustentável exige trade-offs</h3>
+            <p class="desc">Por que imitar e "fazer as duas coisas" falha, de onde vêm as renúncias e por que a essência da estratégia é escolher o que não fazer.</p>
+          </article>
+        </li>
+
+        <li class="etapa futura">
+          <div class="marco"><span class="marco-n">IV</span><span class="marco-fase">pp. 45–50</span></div>
+          <article class="etapa-card">
+            <div class="etapa-aula" data-fase=" · pp. 45–50">Aula 4 <span class="badge-breve">Em breve</span></div>
+            <h3>O encaixe gera vantagem e sustentabilidade</h3>
+            <p class="desc">Os três tipos de encaixe entre atividades, os mapas de sistemas de atividades e por que o todo é mais difícil de copiar que as partes.</p>
+          </article>
+        </li>
+
+        <li class="etapa futura">
+          <div class="marco"><span class="marco-n">V</span><span class="marco-fase">pp. 50–53</span></div>
+          <article class="etapa-card">
+            <div class="etapa-aula" data-fase=" · pp. 50–53">Aula 5 <span class="badge-breve">Em breve</span></div>
+            <h3>Redescobrindo a estratégia</h3>
+            <p class="desc">Por que as empresas deixam de escolher, a armadilha do crescimento, o crescimento lucrativo e o papel da liderança.</p>
+          </article>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bloco" id="porter">
+    <div class="wrap">
+      <div class="trilha-topo">
+        <div>
+          <div class="eyebrow-sec"><i></i>O autor</div>
+          <h2 class="titulo-sec">Quem é Michael Porter</h2>
+          <p class="intro-sec">Engenheiro de formação e economista de carreira, Porter construiu ao longo de cinco décadas boa parte do vocabulário que hoje usamos para falar de estratégia. As obras abaixo estão agrupadas pelas perguntas que ele perseguiu, para mostrar como uma ideia leva à seguinte.</p>
+        </div>
+      </div>
+
+      <div class="porter-grid">
+        <aside class="bio">
+          <div class="bio-mono" aria-hidden="true">MP</div>
+          <h3>Michael E. Porter</h3>
+          <p class="bio-cargo">Bishop William Lawrence University Professor na Harvard Business School</p>
+          <p>Nascido em 1947, em Ann Arbor (Michigan), formou-se em <strong>engenharia aeroespacial e mecânica em Princeton</strong> (1969) antes de fazer o MBA (1971) e o PhD em economia empresarial (1973) em Harvard. Vem da economia da organização industrial a ideia que atravessa toda a sua obra: o desempenho de uma empresa depende da estrutura do setor e da posição que ela ocupa nele.</p>
+          <p>É considerado o fundador do campo moderno da estratégia. Dirige o <strong>Institute for Strategy and Competitiveness</strong>, em Harvard, e recebeu seis vezes o McKinsey Award de melhor artigo da Harvard Business Review. O título de <em>University Professor</em> é a maior distinção do corpo docente de Harvard.</p>
+          <dl>
+            <dt>1983</dt><dd>Cofunda a consultoria Monitor Group</dd>
+            <dt>1994</dt><dd>Funda a Initiative for a Competitive Inner City</dd>
+            <dt>2000</dt><dd>FSG, com Mark Kramer (impacto social)</dd>
+            <dt>2012</dt><dd>Cofunda o ICHOM (resultados em saúde)</dd>
+          </dl>
+          <div class="ideias" aria-label="Ideias associadas a Porter">
+            <span>Cinco forças</span><span>Estratégias genéricas</span><span>Cadeia de valor</span><span>Diamante</span><span>Clusters</span><span>Valor compartilhado</span><span>Valor em saúde</span>
+          </div>
+        </aside>
+
+        <div class="fases">
+          <article class="fase">
+            <div class="fase-cab"><h3>1. A estrutura do setor</h3><span class="fase-anos">1976–1983</span></div>
+            <p>Por que alguns setores são mais lucrativos que outros? Da tese de doutorado nascem as cinco forças e as estratégias genéricas.</p>
+            <ul class="obras">
+              <li><span class="ano">1976</span><span class="tipo livro">Livro</span><span><em>Interbrand Choice, Strategy, and Bilateral Market Power</em><small>A tese de doutorado, publicada pela Harvard University Press.</small></span></li>
+              <li><span class="ano">1979</span><span class="tipo artigo">Artigo</span><span><em>How Competitive Forces Shape Strategy</em><small>HBR. Primeira apresentação das cinco forças competitivas.</small></span></li>
+              <li><span class="ano">1980</span><span class="tipo livro">Livro</span><span><em>Competitive Strategy</em><small>No Brasil, <em>Estratégia competitiva</em>. Cinco forças e estratégias genéricas: custo, diferenciação e foco.</small></span></li>
+              <li><span class="ano">1980</span><span class="tipo livro">Livro</span><span><em>Competition in the Open Economy</em><small>Com Richard Caves e Michael Spence.</small></span></li>
+              <li><span class="ano">1983</span><span class="tipo livro">Livro</span><span><em>Cases in Competitive Strategy</em><small>Casos que acompanham <em>Competitive Strategy</em>.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>2. Dentro da empresa: atividades e cadeia de valor</h3><span class="fase-anos">1985–1987</span></div>
+            <p>De onde vem a vantagem de uma empresa dentro do setor? A resposta é a cadeia de valor: as atividades são a unidade básica da vantagem, ideia retomada na Parte I do <em>What Is Strategy?</em>.</p>
+            <ul class="obras">
+              <li><span class="ano">1985</span><span class="tipo livro">Livro</span><span><em>Competitive Advantage</em><small>No Brasil, <em>Vantagem competitiva</em>. Apresenta a cadeia de valor. É citado na nota 1 do artigo.</small></span></li>
+              <li><span class="ano">1987</span><span class="tipo artigo">Artigo</span><span><em>From Competitive Advantage to Corporate Strategy</em><small>HBR. Diversificação e compartilhamento de atividades entre negócios.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>3. Nações, regiões e clusters</h3><span class="fase-anos">1986–2000</span></div>
+            <p>A mesma lógica aplicada a países e cidades: por que certas localidades concentram empresas vencedoras de um setor?</p>
+            <ul class="obras">
+              <li><span class="ano">1986</span><span class="tipo livro">Livro</span><span><em>Competition in Global Industries</em><small>Coletânea organizada por Porter sobre competição global.</small></span></li>
+              <li><span class="ano">1990</span><span class="tipo livro">Livro</span><span><em>The Competitive Advantage of Nations</em><small>No Brasil, <em>A vantagem competitiva das nações</em>. Apresenta o modelo do diamante.</small></span></li>
+              <li><span class="ano">1995</span><span class="tipo artigo">Artigo</span><span><em>The Competitive Advantage of the Inner City</em><small>HBR. Origem da Initiative for a Competitive Inner City.</small></span></li>
+              <li><span class="ano">1995</span><span class="tipo artigo">Artigo</span><span><em>Green and Competitive</em><small>HBR, com Claas van der Linde. Regulação ambiental e inovação.</small></span></li>
+              <li><span class="ano">1998</span><span class="tipo artigo">Artigo</span><span><em>Clusters and the New Economics of Competition</em><small>HBR. Por que a localização continua importando.</small></span></li>
+              <li><span class="ano">2000</span><span class="tipo livro">Livro</span><span><em>Can Japan Compete?</em><small>Com Hirotaka Takeuchi e Mariko Sakakibara. Aprofunda o quadro sobre o Japão da Parte I.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>4. O que é, afinal, estratégia</h3><span class="fase-anos">1991–2008</span></div>
+            <p>Diante da onda de benchmarking, reengenharia e "hipercompetição", Porter separa eficácia operacional de estratégia e volta às escolhas, às renúncias e ao encaixe.</p>
+            <ul class="obras">
+              <li><span class="ano">1991</span><span class="tipo artigo">Artigo</span><span><em>Towards a Dynamic Theory of Strategy</em><small>Strategic Management Journal.</small></span></li>
+              <li class="destaque"><span class="ano">1996</span><span class="tipo artigo">Artigo</span><span><em>What Is Strategy?</em><small>HBR. O texto desta disciplina.</small></span></li>
+              <li><span class="ano">1998</span><span class="tipo livro">Livro</span><span><em>On Competition</em><small>No Brasil, <em>Competição</em>. Reúne os principais artigos da HBR, incluindo o <em>What Is Strategy?</em>. Edição ampliada em 2008.</small></span></li>
+              <li><span class="ano">2001</span><span class="tipo artigo">Artigo</span><span><em>Strategy and the Internet</em><small>HBR. A internet como tecnologia que facilita a imitação e exige ainda mais estratégia.</small></span></li>
+              <li><span class="ano">2008</span><span class="tipo artigo">Artigo</span><span><em>The Five Competitive Forces That Shape Strategy</em><small>HBR. Revisão das cinco forças, 29 anos depois.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>5. Empresa e sociedade</h3><span class="fase-anos">2002–2011</span></div>
+            <p>Com Mark Kramer, Porter leva a lógica da vantagem competitiva para a filantropia, a responsabilidade social e o valor compartilhado.</p>
+            <ul class="obras">
+              <li><span class="ano">2002</span><span class="tipo artigo">Artigo</span><span><em>The Competitive Advantage of Corporate Philanthropy</em><small>HBR, com Mark Kramer.</small></span></li>
+              <li><span class="ano">2006</span><span class="tipo artigo">Artigo</span><span><em>Strategy and Society</em><small>HBR, com Mark Kramer. Responsabilidade social ligada à vantagem competitiva.</small></span></li>
+              <li><span class="ano">2011</span><span class="tipo artigo">Artigo</span><span><em>Creating Shared Value</em><small>HBR, com Mark Kramer. O conceito de valor compartilhado.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>6. Saúde baseada em valor</h3><span class="fase-anos">2006–2013</span></div>
+            <p>A pergunta "qual é o valor entregue ao cliente?" aplicada à saúde: resultados que importam ao paciente divididos pelo custo de alcançá-los.</p>
+            <ul class="obras">
+              <li><span class="ano">2006</span><span class="tipo livro">Livro</span><span><em>Redefining Health Care</em><small>Com Elizabeth Teisberg. No Brasil, <em>Repensando a saúde</em>.</small></span></li>
+              <li><span class="ano">2010</span><span class="tipo artigo">Artigo</span><span><em>What Is Value in Health Care?</em><small>New England Journal of Medicine.</small></span></li>
+              <li><span class="ano">2013</span><span class="tipo artigo">Artigo</span><span><em>The Strategy That Will Fix Health Care</em><small>HBR, com Thomas H. Lee.</small></span></li>
+            </ul>
+          </article>
+
+          <article class="fase">
+            <div class="fase-cab"><h3>7. Tecnologia e política</h3><span class="fase-anos">2014–2020</span></div>
+            <p>Os produtos conectados mudam as fronteiras dos setores; e a política norte-americana é analisada como um "setor" com suas próprias forças competitivas.</p>
+            <ul class="obras">
+              <li><span class="ano">2014</span><span class="tipo artigo">Artigo</span><span><em>How Smart, Connected Products Are Transforming Competition</em><small>HBR, com James Heppelmann. Continuação em 2015, sobre as empresas.</small></span></li>
+              <li><span class="ano">2017</span><span class="tipo artigo">Artigo</span><span><em>Why Every Organization Needs an Augmented Reality Strategy</em><small>HBR, com James Heppelmann.</small></span></li>
+              <li><span class="ano">2020</span><span class="tipo livro">Livro</span><span><em>The Politics Industry</em><small>Com Katherine Gehl. As cinco forças aplicadas ao sistema político.</small></span></li>
+            </ul>
+          </article>
+          <p class="nota-obras">Seleção das obras principais. Segundo o Institute for Strategy and Competitiveness (Harvard), Porter é autor de 19 livros e de mais de 130 artigos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><strong id="rodapeNome">Entendendo Porter</strong> · Portal da disciplina</span>
+    <span>Dúvidas sobre o uso? <button type="button" id="rodapeAjuda">Como usar o portal</button></span>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/portal.js"></script>
+<script>
+(function () {
+  var C = window.VD_CONFIG || {};
+  if (C.PROGRAMA) document.getElementById('programa').textContent = C.PROGRAMA;
+  if (C.NOME_DISCIPLINA) { document.getElementById('rodapeNome').textContent = C.NOME_DISCIPLINA; }
+
+  VD.iniciarPagina();
+  document.getElementById('rodapeAjuda').onclick = function () { VD.abrirInstrucoes(); };
+  if (location.hash === '#ajuda') VD.abrirInstrucoes();
+
+  var esc = VD.esc;
+  var ATIVIDADES = [
+    { id: 'aula1', nome: 'Aula 1 · Parte I', url: 'partes/parte-1.html' }
+  ];
+
+  function rotulo(reg) {
+    if (!reg) return null;
+    if (VD.emPlanilha() && reg.pendente) return 'Alterações ainda não enviadas';
+    return 'Salva ' + VD.fmtHora(reg.base || reg.atualizado);
+  }
+
+  function render() {
+    var s = VD.sessao();
+    var card = document.getElementById('sessaoCard');
+    if (!s) {
+      card.innerHTML =
+        '<div class="eyebrow">Comece por aqui</div>' +
+        '<h2>Entre para fazer as atividades</h2>' +
+        '<p>Use o seu nome completo e uma palavra-chave. Assim suas respostas ficam guardadas e você continua de onde parou, em qualquer computador.</p>' +
+        '<div class="sessao-acoes"><button type="button" class="vd-btn vd-btn-amarelo" id="btnEntrar">Entrar</button>' +
+        '<button type="button" class="vd-btn vd-btn-claro" id="btnGuia">Como usar o portal</button></div>';
+      document.getElementById('btnEntrar').onclick = function () { VD.abrirLogin(); };
+      document.getElementById('btnGuia').onclick = function () { VD.abrirInstrucoes(); };
+    } else {
+      card.innerHTML =
+        '<div class="eyebrow">' + (s.turma ? esc(s.turma) : 'Sua área') + '</div>' +
+        '<h2>Olá, ' + esc(s.nome) + '</h2>' +
+        '<p>' + (VD.emPlanilha() ? 'Suas respostas estão sendo salvas na planilha da turma.' : 'Modo local: suas respostas ficam salvas neste navegador.') + '</p>' +
+        '<ul class="progresso">' + ATIVIDADES.map(function (a) {
+          var r = rotulo(VD.registro(a.id));
+          return '<li class="' + (r ? 'feito' : '') + '"><span>' + esc(a.nome) + '</span><span>' + (r ? esc(r) : 'Não iniciada') + '</span></li>';
+        }).join('') + '</ul>' +
+        '<div class="sessao-acoes"><a class="vd-btn vd-btn-amarelo" href="' + proxima() + '">Continuar</a>' +
+        '<button type="button" class="vd-btn vd-btn-claro" id="btnSair">Trocar de estudante</button></div>';
+      document.getElementById('btnSair').onclick = function () { VD.sair(); };
+    }
+
+    document.querySelectorAll('[data-ferramenta]').forEach(function (el) {
+      var r = rotulo(VD.registro(el.dataset.ferramenta));
+      el.classList.toggle('feito', !!r);
+      el.textContent = r ? '✓ ' + r : 'Não iniciada';
+    });
+  }
+
+  function proxima() {
+    for (var i = 0; i < ATIVIDADES.length; i++) if (!VD.registro(ATIVIDADES[i].id)) return ATIVIDADES[i].url;
+    return ATIVIDADES[ATIVIDADES.length - 1].url;
+  }
+
+  VD.onSessao(render);
+  render();
+})();
+</script>
+</body>
+</html>
