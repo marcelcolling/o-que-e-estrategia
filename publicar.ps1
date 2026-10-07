@@ -13,7 +13,9 @@ $usuario = gh api user --jq .login
 if (-not (git remote 2>$null | Select-String -Quiet "origin")) {
     gh repo create $Nome --public --source . --remote origin --description "Portal da disciplina Entendendo Porter: O que é estratégia?"
 }
-git push -u origin main
+# via cmd: no PowerShell 5.1, o progresso que o git escreve no stderr viraria erro e pararia o script
+cmd /c "git push -u origin main 2>&1"
+if ($LASTEXITCODE -ne 0) { throw "git push falhou" }
 
 # Ativa o GitHub Pages (branch main, pasta raiz). Se já estiver ativo, apenas segue.
 try {
