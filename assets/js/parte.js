@@ -204,6 +204,134 @@
     };
   };
 
+  /* ----- Aula 2, Bloco 2: cadeia de atividades comparada ----- */
+  var ATIVIDADES_PADRAO = ['Desenvolvimento do produto', 'Canal e venda', 'Atendimento', 'Logística e entrega', 'Pós-venda', 'Algo que acrescentamos'];
+  var AVAL = [['diferente', 'Diferente'], ['melhor', 'Só melhor'], ['igual', 'Igual']];
+  W.cadeia = function (el) {
+    var d = [];
+    function padrao() { return ATIVIDADES_PADRAO.map(function (a) { return { atv: a, conc: '', nos: '', aval: '' }; }); }
+    el.innerHTML = '<div class="cd-cab" aria-hidden="true"><span>Atividade</span><span>Concorrente tradicional</span><span>Empresa analisada</span><span>É…</span><span></span></div>' +
+      '<div class="cd-linhas"></div><button type="button" class="btn-add cd-add">+ Atividade</button><p class="cd-resumo" aria-live="polite"></p>';
+    var linhas = el.querySelector('.cd-linhas');
+    function montar() {
+      linhas.innerHTML = d.map(function (r, i) {
+        return '<div class="cd-linha" data-i="' + i + '">' +
+          '<textarea class="cd-atv" rows="2" maxlength="80" aria-label="Atividade ' + (i + 1) + '"></textarea>' +
+          '<textarea class="cd-conc" rows="2" placeholder="Como o concorrente faz" aria-label="Concorrente tradicional, atividade ' + (i + 1) + '"></textarea>' +
+          '<textarea class="cd-nos" rows="2" placeholder="Como a empresa analisada faz" aria-label="Empresa analisada, atividade ' + (i + 1) + '"></textarea>' +
+          '<select class="cd-aval" aria-label="Avaliação da atividade ' + (i + 1) + '"><option value="">Avalie…</option>' +
+          AVAL.map(function (a) { return '<option value="' + a[0] + '">' + a[1] + '</option>'; }).join('') + '</select>' +
+          '<button type="button" class="pf-x cd-x" aria-label="Remover atividade ' + (i + 1) + '">✕</button></div>';
+      }).join('');
+      linhas.querySelectorAll('.cd-linha').forEach(function (l, i) {
+        l.querySelector('.cd-atv').value = d[i].atv; l.querySelector('.cd-conc').value = d[i].conc;
+        l.querySelector('.cd-nos').value = d[i].nos; l.querySelector('.cd-aval').value = d[i].aval;
+      });
+      resumir();
+    }
+    function resumir() {
+      var aval = d.filter(function (r) { return r.aval; }), dif = aval.filter(function (r) { return r.aval === 'diferente'; }).length;
+      el.querySelector('.cd-resumo').textContent = aval.length
+        ? dif + ' de ' + aval.length + ' atividades avaliadas são realmente diferentes. ' +
+          (dif === 0 ? 'Sem atividades diferentes, a posição é um slogan (ou EO).' : dif === 1 ? 'Uma diferença isolada é fácil de copiar: há outras?' : 'Há base para uma posição: as atividades diferentes se reforçam?')
+        : '';
+    }
+    el.addEventListener('input', function (e) {
+      var l = e.target.closest('.cd-linha'); if (!l) return;
+      var i = Number(l.dataset.i);
+      d[i] = { atv: l.querySelector('.cd-atv').value, conc: l.querySelector('.cd-conc').value, nos: l.querySelector('.cd-nos').value, aval: l.querySelector('.cd-aval').value };
+      resumir();
+    });
+    el.addEventListener('change', function (e) { if (e.target.classList.contains('cd-aval')) e.target.dispatchEvent(new Event('input', { bubbles: true })); });
+    el.addEventListener('click', function (e) {
+      if (e.target.closest('.cd-add')) { d.push({ atv: '', conc: '', nos: '', aval: '' }); montar(); var a = linhas.querySelectorAll('.cd-atv'); a[a.length - 1].focus(); }
+      var x = e.target.closest('.cd-x');
+      if (x) { d.splice(Number(x.closest('.cd-linha').dataset.i), 1); if (!d.length) d = padrao(); montar(); }
+    });
+    return {
+      coletar: function () { return d.some(function (r) { return r.conc || r.nos || r.aval; }) ? d : null; },
+      aplicar: function (v) {
+        d = Array.isArray(v) && v.length ? v.map(function (r) { return { atv: String(r.atv || ''), conc: String(r.conc || ''), nos: String(r.nos || ''), aval: String(r.aval || '') }; }) : padrao();
+        montar();
+      },
+      resumo: function (v) {
+        return (v || []).filter(function (r) { return r.conc || r.nos || r.aval; }).map(function (r) {
+          var a = AVAL.filter(function (x) { return x[0] === r.aval; })[0];
+          return ['Bloco 2 · Cadeia comparada', r.atv || 'Atividade', 'Concorrente: ' + (r.conc || '—') + ' · Empresa analisada: ' + (r.nos || '—') + ' · ' + (a ? a[1] : 'sem avaliação')];
+        });
+      },
+      respondido: function (v) { return !!(v && v.filter(function (r) { return r.aval; }).length >= 3); }
+    };
+  };
+
+  /* ----- Aula 2, Bloco 7: matriz de rastreabilidade do BSC ----- */
+  var EXEC = [['sim', 'Sim'], ['parcial', 'Em parte'], ['nao', 'Não']];
+  W.rastreio = function (el) {
+    var d = [];
+    function vazio() { return [0, 1, 2].map(function () { return { cli: '', proc: '', conc: '' }; }); }
+    el.innerHTML = '<div class="rt-linhas"></div><button type="button" class="btn-add rt-add">+ Objetivo</button><p class="rt-diag" aria-live="polite"></p>';
+    var linhas = el.querySelector('.rt-linhas');
+    function montar() {
+      linhas.innerHTML = d.map(function (r, i) {
+        return '<div class="rt-linha" data-i="' + i + '"><span class="rt-n">' + (i + 1) + '</span>' +
+          '<label><span>Objetivo de clientes</span><textarea class="rt-cli" rows="2"></textarea></label>' +
+          '<label><span>Objetivo de processos que o sustenta</span><textarea class="rt-proc" rows="2"></textarea></label>' +
+          '<div class="rt-conc" role="group" aria-label="O concorrente executa esse processo? (linha ' + (i + 1) + ')"><span>O concorrente executa?</span>' +
+          EXEC.map(function (x) { return '<label class="pilula"><input type="radio" name="rt-' + i + '" value="' + x[0] + '"><span>' + x[1] + '</span></label>'; }).join('') +
+          '</div><button type="button" class="pf-x rt-x" aria-label="Remover objetivo ' + (i + 1) + '">✕</button></div>';
+      }).join('');
+      linhas.querySelectorAll('.rt-linha').forEach(function (l, i) {
+        l.querySelector('.rt-cli').value = d[i].cli; l.querySelector('.rt-proc').value = d[i].proc;
+        l.querySelectorAll('input[type=radio]').forEach(function (r) { r.checked = r.value === d[i].conc; });
+      });
+      diagnosticar();
+    }
+    function ler() {
+      d = Array.prototype.map.call(linhas.querySelectorAll('.rt-linha'), function (l) {
+        var r = l.querySelector('input:checked');
+        return { cli: l.querySelector('.rt-cli').value, proc: l.querySelector('.rt-proc').value, conc: r ? r.value : '' };
+      });
+      diagnosticar();
+    }
+    function diagnosticar() {
+      var marc = d.filter(function (r) { return r.conc; }), nao = marc.filter(function (r) { return r.conc === 'nao'; }).length;
+      el.querySelector('.rt-diag').textContent = !marc.length ? '' :
+        (nao === 0 ? 'O concorrente executa todos os processos listados: pela Prática 1, o mapa é um slogan.' :
+          nao + ' de ' + marc.length + ' objetivos se apoiam em processos que o concorrente não executa: é aí que a posição se materializa.');
+    }
+    el.addEventListener('input', ler);
+    el.addEventListener('change', ler);
+    el.addEventListener('click', function (e) {
+      if (e.target.closest('.rt-add')) { d.push({ cli: '', proc: '', conc: '' }); montar(); var a = linhas.querySelectorAll('.rt-cli'); a[a.length - 1].focus(); }
+      var x = e.target.closest('.rt-x');
+      if (x) { d.splice(Number(x.closest('.rt-linha').dataset.i), 1); if (!d.length) d = vazio(); montar(); }
+    });
+    return {
+      coletar: function () { return d.some(function (r) { return r.cli || r.proc || r.conc; }) ? d : null; },
+      aplicar: function (v) {
+        d = Array.isArray(v) && v.length ? v.map(function (r) { return { cli: String(r.cli || ''), proc: String(r.proc || ''), conc: String(r.conc || '') }; }) : vazio();
+        montar();
+      },
+      resumo: function (v) {
+        return (v || []).filter(function (r) { return r.cli || r.proc || r.conc; }).map(function (r, i) {
+          var c = EXEC.filter(function (x) { return x[0] === r.conc; })[0];
+          return ['Bloco 7 · Matriz de rastreabilidade', 'Linha ' + (i + 1) + ': ' + (r.cli || '—'), 'Processo: ' + (r.proc || '—') + ' · O concorrente executa? ' + (c ? c[1] : '—')];
+        });
+      },
+      respondido: function (v) { return !!(v && v.some(function (r) { return r.cli && r.proc && r.conc; })); }
+    };
+  };
+
+  /* ----- espelho: mostra (só para leitura, sempre escapado) o que o estudante escreveu em outro campo ----- */
+  function atualizarEspelhos() {
+    document.querySelectorAll('[data-espelho]').forEach(function (el) {
+      var c = document.querySelector('[data-campo="' + el.dataset.espelho + '"]');
+      var v = c && c.value.trim();
+      el.textContent = v || el.dataset.vazio || '';
+      el.classList.toggle('vazio', !v);
+    });
+  }
+
   /* ================================================================ campos simples */
   function campos() { return Array.prototype.slice.call(document.querySelectorAll('[data-campo]')); }
 
@@ -369,6 +497,7 @@
       cont.textContent = algum ? 'Continuar: módulo ' + (alvo.i + 1) + ' · ' + alvo.m.dataset.titulo : 'Começar pelo módulo 1';
     }
     resumirMapa();
+    atualizarEspelhos();
     compararExit();
   }
 

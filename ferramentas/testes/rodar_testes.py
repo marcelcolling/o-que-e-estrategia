@@ -20,16 +20,17 @@ import urllib.request
 
 AQUI = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parent))
-from capturar_telas import WS, EDGE  # noqa: E402
+from capturar_telas import WS, EDGE, encerrar  # noqa: E402
 
 PORTA_SITE, PORTA_CDP, LIMITE, ARRANQUE, TENTATIVAS = 8766, 9337, 300, 30, 3
 
 
-def rodar():
+def rodar(tentativa):
     """Uma tentativa. Devolve (linhas, terminou, travou_no_inicio)."""
-    srv = subprocess.Popen([sys.executable, str(AQUI / "servidor_simulado.py"), str(PORTA_SITE)],
+    porta_site, porta_cdp = PORTA_SITE + 10 * (tentativa - 1), PORTA_CDP + 10 * (tentativa - 1)  # portas novas a cada tentativa
+    srv = subprocess.Popen([sys.executable, str(AQUI / "servidor_simulado.py"), str(porta_site)],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    edge = subprocess.Popen([EDGE, "--headless=new", "--disable-gpu", "--no-first-run", f"--remote-debugging-port={PORTA_CDP}",
+    edge = subprocess.Popen([EDGE, "--headless=new", "--disable-gpu", "--no-first-run", f"--remote-debugging-port={porta_cdp}",
                              f"--user-data-dir={tempfile.mkdtemp(prefix='pe-teste-')}", "about:blank"],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     linhas, fim = [], False
@@ -38,14 +39,21 @@ def rodar():
         alvo = None
         for _ in range(40):
             try:
-                alvo = next(t for t in json.load(urllib.request.urlopen(f"http://127.0.0.1:{PORTA_CDP}/json")) if t["type"] == "page")
+                alvo = next(t for t in json.load(urllib.request.urlopen(f"http://127.0.0.1:{porta_cdp}/json")) if t["type"] == "page")
                 break
             except Exception:
                 time.sleep(0.5)
+        if not alvo:
+            return linhas, False, True
         ws = WS(alvo["webSocketDebuggerUrl"])
         ws.cmd("Page.enable")
         ws.cmd("Runtime.enable")
-        ws.cmd("Page.navigate", url=f"http://127.0.0.1:{PORTA_SITE}/__teste.html")
+        # aba "em primeiro plano", com foco e janela grande o bastante para o iframe do teste:
+        # sem isso o headless às vezes adia a renderização e a página fica parada em "loading"
+        ws.cmd("Page.bringToFront")
+        ws.cmd("Emulation.setFocusEmulationEnabled", enabled=True)
+        ws.cmd("Emulation.setDeviceMetricsOverride", width=1280, height=1400, deviceScaleFactor=1, mobile=False)
+        ws.cmd("Page.navigate", url=f"http://127.0.0.1:{porta_site}/__teste.html")
         inicio = time.time()
         while time.time() - inicio < LIMITE and not fim:
             time.sleep(3)
@@ -61,13 +69,13 @@ def rodar():
                 return linhas, False, True
         return linhas, fim, False
     finally:
-        edge.kill()
-        srv.kill()
+        encerrar(edge)
+        encerrar(srv)
         time.sleep(1)
 
 
 for tentativa in range(1, TENTATIVAS + 1):
-    linhas, fim, travou = rodar()
+    linhas, fim, travou = rodar(tentativa)
     if not travou:
         break
     print(f"(o Edge headless travou ao carregar a página; recomeçando, tentativa {tentativa + 1} de {TENTATIVAS})", flush=True)

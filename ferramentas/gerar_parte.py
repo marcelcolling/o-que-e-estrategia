@@ -19,7 +19,7 @@ Formato da tradução (uma linha por parágrafo):
     [p37] texto                            parágrafo que começa na página 37
     ?PAUSA chave | pergunta                pausa para responder (caixa de atividade)
     ?FIGURA p39 | título | eixo y | eixo x | rótulo da curva | alto | baixo
-    ?QUADRO p40 | título   ...   ?NOTAQUADRO texto   ?FIMQUADRO
+    ?QUADRO p40 | título [| id]   ...   ?NOTAQUADRO texto   ?FIMQUADRO
     [^1]  /  [^1]: texto                   nota de rodapé
 Marcações extras no material:
     ::: visual nome                        esquema visual gerado por atividades_parteN.visual(nome)
@@ -34,6 +34,7 @@ import unicodedata
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "ferramentas"))
 import atividades_parte1 as AT  # noqa: E402
+import atividades_parte2 as AT2  # noqa: E402
 
 PARTES = [
     {
@@ -43,7 +44,17 @@ PARTES = [
         "destino": RAIZ / "partes" / "parte-1.html",
         "atividades": AT,
     },
+    {
+        "n": 2,
+        "traducao": RAIZ / "conteudo" / "porter-parte-2-traducao.md",
+        "material": RAIZ / "conteudo" / "aula-2-material-estudante.md",
+        "destino": RAIZ / "partes" / "parte-2.html",
+        "atividades": AT2,
+    },
 ]
+
+
+ROMANOS = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V"}
 
 
 # ---------------------------------------------------------------- utilidades
@@ -120,10 +131,12 @@ def render_traducao(md, at):
             corpo.append(figura_fronteira(pag[1:], titulo, eixo_y, eixo_x, curva, alto, baixo))
             continue
         if s.startswith("?QUADRO"):
-            pag, titulo = [x.strip() for x in s[len("?QUADRO"):].split("|", 1)]
-            subs.append(("quadro-japao", "Quadro: as empresas japonesas"))
+            campos_q = [x.strip() for x in s[len("?QUADRO"):].split("|")]
+            pag, titulo = campos_q[0], campos_q[1]
+            qid = campos_q[2] if len(campos_q) > 2 else slug("quadro-" + titulo, usados)
+            subs.append((qid, "Quadro: " + puro(titulo)))
             corpo.append(
-                f'<aside class="quadro" id="quadro-japao"><div class="quadro-cab"><span class="quadro-eyebrow">'
+                f'<aside class="quadro" id="{qid}"><div class="quadro-cab"><span class="quadro-eyebrow">'
                 f'Quadro · p. {pag[1:]}</span><h3>{inline(titulo)}</h3></div><div class="quadro-corpo">'
             )
             no_quadro = True
@@ -518,7 +531,7 @@ def gerar(cfg):
 
     valores = dict(
         n=cfg["n"],
-        titulo_pagina=html.escape(f"Parte I · {puro(titulo_m)}"),
+        titulo_pagina=html.escape(f"Parte {ROMANOS[cfg['n']]} · {puro(titulo_m)}"),
         titulo_m=inline(titulo_m),
         sub_m=inline(sub_m),
         ficha="".join(render_paragrafo(p) for p in ficha),

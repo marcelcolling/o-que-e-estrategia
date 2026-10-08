@@ -50,7 +50,21 @@ CAPTURAS = [
     ("m-p1-texto", "/partes/parte-1.html", "p5", 520, 1600),
     ("m-p1-esquema", "/partes/parte-1.html", "3-2-a-fronteira-em-um-esquema", 520, 1400),
     ("m-p1-simulador", "/partes/parte-1.html", "simulador", 520, 2600),
+    ("p2-indice", "/partes/parte-2.html", "", 1366, 1500),
+    ("p2-texto", "/partes/parte-2.html", "p8", 1366, 1200),
+    ("p2-quadro", "/partes/parte-2.html", "quadro-novas-posicoes", 1366, 1200),
+    ("p2-abertura", "/partes/parte-2.html", "a-sua-frase-de-estrategia", 1366, 1300),
+    ("p2-cadeia", "/partes/parte-2.html", "2-4-exercicio-a-cadeia-comparada", 1366, 1400),
+    ("p2-classificacao", "/partes/parte-2.html", "3-6-exercicio-de-classificacao", 1366, 1300),
+    ("p2-rastreio", "/partes/parte-2.html", "7-4-quatro-praticas-de-execucao", 1366, 1500),
+    ("m-p2-cadeia", "/partes/parte-2.html", "2-4-exercicio-a-cadeia-comparada", 520, 2200),
+    ("m-p2-classificacao", "/partes/parte-2.html", "3-6-exercicio-de-classificacao", 520, 2000),
 ]
+
+
+def encerrar(proc):
+    """Encerra o processo e todos os filhos (no Windows, edge.kill() deixa os processos filhos do Edge vivos)."""
+    subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
 
 
 class WS:
@@ -133,6 +147,8 @@ def main(saida):
         ws = WS(alvo["webSocketDebuggerUrl"])
         ws.cmd("Page.enable")
         ws.cmd("Runtime.enable")   # sem isto, o headless às vezes não executa os scripts da página a tempo
+        ws.cmd("Page.bringToFront")
+        ws.cmd("Emulation.setFocusEmulationEnabled", enabled=True)
         base = f"http://127.0.0.1:{PORTA_SITE}"
         ws.cmd("Page.navigate", url=base + "/index.html")
         time.sleep(1.5)
@@ -176,8 +192,8 @@ def main(saida):
         erros = ws.cmd("Runtime.evaluate", returnByValue=True, expression="document.documentElement.scrollWidth > innerWidth ? 'rolagem horizontal!' : 'sem rolagem horizontal'")
         print("última página (520px):", erros["result"]["value"])
     finally:
-        edge.kill()
-        site.kill()
+        encerrar(edge)
+        encerrar(site)
 
 
 if __name__ == "__main__":

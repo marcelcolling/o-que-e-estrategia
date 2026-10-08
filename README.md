@@ -7,7 +7,7 @@ Portal da disciplina Execução Estratégica. Cada aula corresponde a uma parte 
 3. **Abertura, Blocos 1 a 7 e Fechamento:** o material da aula, escrito para o estudante, com as atividades no próprio texto (os comentários ficam recolhidos até ele responder), o caso Vivelar com simulador e o exit ticket;
 4. **Para consulta:** como a simulação funciona, armadilhas comuns e referências.
 
-O material publicado é a versão revisada (`conteudo/aula-1-material-estudante.md`). O seu original (`conteudo/aula-1-material.md`) fica guardado como referência.
+O material publicado é a versão revisada de cada aula (`conteudo/aula-N-material-estudante.md`). Os seus originais (`conteudo/aula-N-material.md`) ficam guardados como referência. Hoje estão publicadas as Aulas 1 e 2.
 
 As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Google, alguns segundos depois.
 
@@ -17,7 +17,7 @@ As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Goog
 
 ## O que vai e o que não vai para a internet
 
-- Vai: a página inicial, a tradução da Parte I, o material da Aula 1 e as atividades.
+- Vai: a página inicial, as traduções das Partes I e II, os materiais das Aulas 1 e 2 e as atividades.
 - **Não vai:** o PDF do artigo (não há link para ele em lugar nenhum), o texto original em inglês e os arquivos `.md` de origem. Eles ficam na pasta `conteudo/`, que só existe no seu computador (OneDrive) e é ignorada pelo git.
 
 ## Ligar a planilha (uma vez)
@@ -57,4 +57,4 @@ git add -A; git commit -m "Atualiza material"; git push
 
 ## Próximas aulas
 
-As Partes II a V já aparecem na trilha como "Em breve". Para liberar uma, basta enviar o material da aula ao Claude. A tradução da parte e as atividades seguem o mesmo padrão da Aula 1.
+As Partes III a V já aparecem na trilha como "Em breve". Para liberar uma, basta enviar o material da aula ao Claude. A tradução da parte e as atividades seguem o mesmo padrão das Aulas 1 e 2, sem mexer nas respostas já salvas das aulas anteriores.
