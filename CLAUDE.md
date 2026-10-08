@@ -40,6 +40,8 @@ ferramentas/atividades_parte1.py  caixas de atividade (chaves data-campo), mapa(
 ferramentas/atividades_parte2.py  idem para a Parte II; reaproveita os componentes e o MODELO da Parte I (troca só os títulos)
 ferramentas/conferir_integridade.py  confere material (palavra por palavra) e tradução (contra o PDF)
 ferramentas/capturar_telas.py  capturas no Edge headless via CDP (1366px e 520px)
+ferramentas/fotografar_chaves.py  protege as respostas salvas: fotografa e compara as chaves das páginas de aula
+prompts/nova-aula.md           prompt para o professor abrir uma conversa nova e publicar a próxima aula
 ferramentas/testes/            teste de ponta a ponta com Apps Script simulado (rodar_testes.ps1 chama rodar_testes.py, via CDP)
 assets/js/portal.js            núcleo: sessão, login, salvamento automático, sincronização, conflito, barra superior, guia de uso
 assets/js/parte.js             página da parte: campos, destacar/anotar parágrafos, widgets, resumo, progresso por módulo,
@@ -100,7 +102,7 @@ O professor cola o `Codigo.gs` novo no editor (Extensões › Apps Script), salv
 
 1. Gerar + conferir integridade (acima).
 2. `.\ferramentas\testes\rodar_testes.ps1`: precisa terminar com `FAIL/ERRO: 0` (68 verificações hoje, incluindo que os dados da Aula 1 ficam intactos ao usar a Aula 2).
-2b. **Chaves das aulas já em uso:** tire uma "fotografia" das chaves de cada `partes/parte-N.html` antes e depois da mudança (`data-campo`, pares `value`/`data-campo`, `data-par`/`data-rotulo`, `data-widget`, id em `PARTE.iniciar`) e confirme que são idênticas. O servidor simulado (`servidor_simulado.py`) segue as mesmas regras do `Codigo.gs`.
+2b. **Chaves das aulas já em uso:** `python ferramentas/fotografar_chaves.py antes` antes de mexer e `python ferramentas/fotografar_chaves.py comparar` depois de gerar (confere `data-campo`, pares opção/chave, `data-par`/`data-rotulo`, `data-widget` e o id em `PARTE.iniciar` de cada `partes/parte-N.html`). As aulas existentes precisam sair OK. O servidor simulado (`servidor_simulado.py`) segue as mesmas regras do `Codigo.gs`.
 3. `python ferramentas/capturar_telas.py <pasta>` e olhar as capturas (1366px e 520px; o script também avisa se houver rolagem horizontal).
 4. Se mexeu no back-end ou na URL: teste contra o Apps Script real com um usuário "Teste (apagar)" e leia a planilha pelo conector do Drive. Depois peça ao professor para removê-lo pelo menu **Portal da disciplina › Remover um estudante…**.
 5. `git add -A; git commit; git push` e confira o site (cache: `?x=aleatório`).
