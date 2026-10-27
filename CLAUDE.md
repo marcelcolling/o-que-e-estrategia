@@ -19,7 +19,7 @@ O núcleo (sessão, salvamento, planilha, testes) veio do portal "Vieses e Decis
 
 - Só a **tradução** vai para o site. Nenhum link para o PDF, em lugar nenhum. O texto em inglês também não é publicado.
 - Os `.md` de origem (material da aula, texto original) **não vão para o GitHub**: `conteudo/` está no `.gitignore` e fica só na pasta local (OneDrive). O que é publicado é o HTML gerado.
-- Uma parte do artigo por aula. Partes I e II publicadas; Partes III a V aparecem como "Em breve" na home.
+- Uma parte do artigo por aula. Partes I a III publicadas; Partes IV e V aparecem como "Em breve" na home.
 - Identidade do "Vieses e Decisão" com azul-escuro no lugar do roxo.
 - **Material e atividades são uma coisa só:** na home, um único botão por aula.
 - **O material fala direto com o estudante** ("você"), sem roteiro de aula, tempos, notas ao professor nem "os alunos devem…". Os originais do professor (`conteudo/aula-N-material.md`) são só referência; cada página é gerada da versão revisada `conteudo/aula-N-material-estudante.md` (enxuta, sem redundâncias, dúvidas repetidas incorporadas aos blocos, modelos de sala virando atividades). A integridade é conferida contra essa versão.
@@ -30,7 +30,7 @@ O núcleo (sessão, salvamento, planilha, testes) veio do portal "Vieses e Decis
 
 ```
 index.html                     home: hero + sessão, trilha das 5 partes, "Quem é Michael Porter" (bio + obras por fase)
-partes/parte-N.html            GERADO por ferramentas/gerar_parte.py (não editar à mão): índice + 12 módulos (N = 1, 2)
+partes/parte-N.html            GERADO por ferramentas/gerar_parte.py (não editar à mão): índice + 12 módulos (N = 1, 2, 3)
 conteudo/  (fora do git)       porter-parte-N-traducao.md, aula-N-material-estudante.md (fonte), aula-N-material.md (original do professor),
                                referencia-parte-N-en.txt, referencia-porter-original.md
 ferramentas/gerar_parte.py     tradução + material (Markdown) + atividades -> página da parte (cada "##" do material vira um módulo;
@@ -38,6 +38,7 @@ ferramentas/gerar_parte.py     tradução + material (Markdown) + atividades -> 
 ferramentas/atividades_parte1.py  caixas de atividade (chaves data-campo), mapa(), visual(), MODULOS (tipo/título curto/descrição),
                                   REGRAS de onde cada caixa entra e o MODELO da página
 ferramentas/atividades_parte2.py  idem para a Parte II; reaproveita os componentes e o MODELO da Parte I (troca só os títulos)
+ferramentas/atividades_parte3.py  idem para a Parte III (sem widget; usa espelho() da Parte II e sub() para separar itens numa caixa)
 ferramentas/conferir_integridade.py  confere material (palavra por palavra) e tradução (contra o PDF)
 ferramentas/capturar_telas.py  capturas no Edge headless via CDP (1366px e 520px)
 ferramentas/fotografar_chaves.py  protege as respostas salvas: fotografa e compara as chaves das páginas de aula
@@ -57,7 +58,7 @@ apps-script/Codigo.gs          back-end na planilha (doPost entrar/salvar, abas 
 - Igual ao portal de referência: `VD.entrar` (nome + palavra-chave), `VD.ferramenta({ id, titulo, crumb, coletar, aplicar, resumo })`, `localStorage` na hora e Apps Script alguns segundos depois, conflito por timestamp, `[data-vd-salvar]` = botão "Salvar respostas".
 - **Prefixos próprios no navegador:** `pe_sessao_v1`, `pe_dados_v1::`, `pe_leitura_`. Os portais do professor ficam no mesmo domínio (`marcelcolling.github.io`) e compartilham o `localStorage`; com os prefixos do outro portal, a sessão e o `aula1` vazariam entre eles. Há um teste para isso.
 - **Uma atividade por aula:** ids `aula1` a `aula5`. Formato salvo (ver `parte.js`):
-  `{ v:1, campos:{ chave: texto|opção|true }, notas:{ "8": texto }, destaques:[3,8], <widgets> }`. Widgets da Aula 1: `fronteira`, `portfolio`, `logo`, `simulador:{ p, exp }`. Da Aula 2: `cadeia` (atividades comparadas) e `rastreio` (matriz de rastreabilidade do BSC). Elementos `[data-espelho="chave"]` só mostram, escapado, o valor de outro campo (ex.: a frase do início).
+  `{ v:1, campos:{ chave: texto|opção|true }, notas:{ "8": texto }, destaques:[3,8], <widgets> }`. Widgets da Aula 1: `fronteira`, `portfolio`, `logo`, `simulador:{ p, exp }`. Da Aula 2: `cadeia` (atividades comparadas) e `rastreio` (matriz de rastreabilidade do BSC). A Aula 3 não tem widget: a lista do "não" (`prep_nao1..3`, `prep_perde1..3`) é espelhada na abertura e no Bloco 3 (`b3_cls_N`, `b3_cls_N_just`), o filtro de straddling usa `b7_fN`/`b7_fN_porque` e o exit ticket tem três botões "trazer". Elementos `[data-espelho="chave"]` só mostram, escapado, o valor de outro campo (ex.: a frase do início).
 - Módulos escondidos usam o atributo `hidden`, mas continuam no DOM: coleta, aplicação e resumo funcionam com todos eles. Ao abrir um módulo, `parte.js` dispara `resize` para recalcular a altura das caixas de texto e o gráfico do simulador.
 - O progresso conta perguntas (campo de texto ou grupo de opções) e widgets; não contam as caixas da síntese nem campos `data-opcional` (anotações do mapa).
 - As chaves de `campos` vêm do atributo `data-campo` em `atividades_parte1.py`. **Não renomeie chaves em uso** (as respostas ficariam órfãs). O mapa usa `mapa_1`…`mapa_7` e `mapa_N_nota`. A chave `b2_duvida7` deixou de existir na revisão (a Dúvida 7 foi incorporada ao Bloco 5). Para tirar uma pergunta, apague a caixa; para acrescentar, use chave nova. Os parágrafos da tradução são identificados pelo número (`notas`/`destaques`): **não junte nem divida parágrafos** depois que a turma começar.
@@ -70,7 +71,7 @@ apps-script/Codigo.gs          back-end na planilha (doPost entrar/salvar, abas 
 1. `python ferramentas/gerar_parte.py`
 2. `python ferramentas/conferir_integridade.py` (com `PYTHONIOENCODING=utf-8` no Git Bash). Precisa dar **OK** nas duas partes: material com 100% de semelhança e tradução com o mesmo número de parágrafos do original, proporção PT/EN entre 0,95 e 1,45 em cada parágrafo e todos os números e nomes próprios.
 
-### Nova parte (ex.: Aula 3 = Parte III, pp. 43–45; foi assim com a Parte II)
+### Nova parte (ex.: Aula 4 = Parte IV, pp. 45–50; foi assim com as Partes II e III)
 1. Extraia o inglês da parte do PDF (`pdftotext -f 7 -l 9`, do Git Bash) para `conteudo/referencia-parte-3-en.txt` no mesmo formato (`[CORPO]`, `[QUADRO]`, `[NOTA]`, um parágrafo por linha). Sem `-layout`, os parágrafos do corpo saem inteiros (junte a continuação de página, que começa em minúscula); os quadros saem em colunas misturadas: copie-os limpos. **Cuidado:** fragmentos de quadro que começam em minúscula podem ser colados por engano a um parágrafo do corpo (aconteceu no §4 da Parte II); a conferência acusa isso como proporção PT/EN fora da faixa.
 2. Traduza em `conteudo/porter-parte-3-traducao.md` (formato no topo de `gerar_parte.py`: `[p44]` marca página **só no início** do parágrafo em que a página começa, `?PAUSA chave | pergunta`, `?QUADRO pNN | título | id`, `?FIGURA`, `[^n]`). Mantenha um parágrafo da tradução por parágrafo do original; subtítulos colados ao parágrafo no inglês viram `###` e entram em `subtitulos` no conferidor.
 3. Copie o material do professor para `conteudo/aula-3-material.md` e escreva a versão do estudante em `aula-3-material-estudante.md` (Mapa de aprendizagem, sem roteiro, tempos ou notas ao professor, dúvidas redundantes incorporadas).
@@ -101,7 +102,7 @@ O professor cola o `Codigo.gs` novo no editor (Extensões › Apps Script), salv
 ## Como validar antes de publicar
 
 1. Gerar + conferir integridade (acima).
-2. `.\ferramentas\testes\rodar_testes.ps1`: precisa terminar com `FAIL/ERRO: 0` (68 verificações hoje, incluindo que os dados da Aula 1 ficam intactos ao usar a Aula 2).
+2. `.\ferramentas\testes\rodar_testes.ps1`: precisa terminar com `FAIL/ERRO: 0` (82 verificações hoje, incluindo que os dados das aulas anteriores ficam intactos ao usar as seguintes).
 2b. **Chaves das aulas já em uso:** `python ferramentas/fotografar_chaves.py antes` antes de mexer e `python ferramentas/fotografar_chaves.py comparar` depois de gerar (confere `data-campo`, pares opção/chave, `data-par`/`data-rotulo`, `data-widget` e o id em `PARTE.iniciar` de cada `partes/parte-N.html`). As aulas existentes precisam sair OK. O servidor simulado (`servidor_simulado.py`) segue as mesmas regras do `Codigo.gs`.
 3. `python ferramentas/capturar_telas.py <pasta>` e olhar as capturas (1366px e 520px; o script também avisa se houver rolagem horizontal).
 4. Se mexeu no back-end ou na URL: teste contra o Apps Script real com um usuário "Teste (apagar)" e leia a planilha pelo conector do Drive. Depois peça ao professor para removê-lo pelo menu **Portal da disciplina › Remover um estudante…**.
@@ -113,5 +114,5 @@ Azul-escuro `#1F3A5F` / profundo `#152A45` / noite `#0E1D31` (no CSS, as variáv
 
 ## Pendências conhecidas
 
-- Partes III a V: material e atividades ainda não existem ("Em breve").
+- Partes IV e V: material e atividades ainda não existem ("Em breve"). Na Aula 3, as dúvidas que repetiam blocos ("todo não é trade-off?", "a Aula 1 não mandava eliminar trade-offs?", "com dinheiro tudo se copia?", "reposicionamento × straddling") foram incorporadas aos Blocos 1, 4 e 5.
 - Erros de digitação do original em inglês tratados na tradução: "in race to stay ahead" (traduzido como "na corrida"), "anothers'".

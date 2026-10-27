@@ -35,6 +35,7 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "ferramentas"))
 import atividades_parte1 as AT  # noqa: E402
 import atividades_parte2 as AT2  # noqa: E402
+import atividades_parte3 as AT3  # noqa: E402
 
 PARTES = [
     {
@@ -50,6 +51,13 @@ PARTES = [
         "material": RAIZ / "conteudo" / "aula-2-material-estudante.md",
         "destino": RAIZ / "partes" / "parte-2.html",
         "atividades": AT2,
+    },
+    {
+        "n": 3,
+        "traducao": RAIZ / "conteudo" / "porter-parte-3-traducao.md",
+        "material": RAIZ / "conteudo" / "aula-3-material-estudante.md",
+        "destino": RAIZ / "partes" / "parte-3.html",
+        "atividades": AT3,
     },
 ]
 

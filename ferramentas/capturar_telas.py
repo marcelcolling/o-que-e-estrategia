@@ -59,6 +59,19 @@ CAPTURAS = [
     ("p2-rastreio", "/partes/parte-2.html", "7-4-quatro-praticas-de-execucao", 1366, 1500),
     ("m-p2-cadeia", "/partes/parte-2.html", "2-4-exercicio-a-cadeia-comparada", 520, 2200),
     ("m-p2-classificacao", "/partes/parte-2.html", "3-6-exercicio-de-classificacao", 520, 2000),
+    ("p3-indice", "/partes/parte-3.html", "", 1366, 1500),
+    ("p3-prep", "/partes/parte-3.html", "antes-de-ler", 1366, 1300),
+    ("p3-texto", "/partes/parte-3.html", "p6", 1366, 1200),
+    ("p3-abertura", "/partes/parte-3.html", "a-sua-lista-do-nao", 1366, 1400),
+    ("p3-lista", "/partes/parte-3.html", "3-6-exercicio-a-sua-lista-do-nao", 1366, 1600),
+    ("p3-continental", "/partes/parte-3.html", "4-4-as-tres-origens-no-caso", 1366, 1300),
+    ("p3-vivelar", "/partes/parte-3.html", "7-5-o-caso-vivelar-o-lider-consegue-copiar-a-posicao-por", 1366, 1500),
+    ("p3-filtro", "/partes/parte-3.html", "7-8-treine-o-filtro-de-straddling-na-vivelar", 1366, 1800),
+    ("p3-exit", "/partes/parte-3.html", "exit-ticket", 1366, 1500),
+    ("m-p3-prep", "/partes/parte-3.html", "antes-de-ler", 520, 2000),
+    ("m-p3-lista", "/partes/parte-3.html", "3-6-exercicio-a-sua-lista-do-nao", 520, 2400),
+    ("m-p3-bsc", "/partes/parte-3.html", "7-7-o-bsc-da-vivelar-com-a-camada-de-renuncias", 520, 2200),
+    ("m-p3-exit", "/partes/parte-3.html", "exit-ticket", 520, 2400),
 ]
 
 

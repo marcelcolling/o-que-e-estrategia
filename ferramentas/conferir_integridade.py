@@ -47,6 +47,16 @@ PARTES = {
         "nomes": ["Southwest", "Ikea", "Jiffy Lube", "Vanguard", "Bessemer Trust", "Citibank", "Carmike", "Delta Air Lines",
                   "Circuit City", "CarMax", "Neutrogena", "Continental Lite", "Competitive Strategy", "Free Press", "NC-17", "737"],
     },
+    3: {
+        "pagina": RAIZ / "partes" / "parte-3.html",
+        "material": C / "aula-3-material-estudante.md",
+        "ref": C / "referencia-parte-3-en.txt",
+        "subtitulos": [],
+        "n_quadro": 0,
+        "extras": [],
+        "nomes": ["J.C. Penney", "Sears", "Continental Airlines", "Southwest", "Continental Lite", "Neutrogena", "Skincare Institute",
+                  "Ivory", "Ikea", "Honda Motor Company", "Toyota Motor Corporation", "Civic", "Corolla", "Estados Unidos", "Japão"],
+    },
 }
 
 
