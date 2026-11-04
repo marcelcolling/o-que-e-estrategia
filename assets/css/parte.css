@@ -540,3 +540,146 @@ details.revelar[open] .rev-ico{ transform:rotate(45deg); }
 @media (prefers-reduced-motion: reduce){
   .sp-barra i, .par-texto p, .passos a, .rev-ico{ transition:none; }
 }
+
+/* =========================================================
+   Aula 4: mapas de sistemas de atividades (.msa) e construtor do mapa do estudante (.sa-)
+   ========================================================= */
+.msa{ background:#fff; border:1px solid var(--paper-line); border-radius:16px; padding:1rem 1.1rem 0.9rem; margin:1.2rem 0 1.4rem; }
+.quadro .msa{ margin:1rem -0.6rem 0.4rem; }
+.msa-legenda, .msa-cats{ display:flex; flex-wrap:wrap; align-items:center; gap:0.35rem 1.05rem; font-size:0.8rem; color:var(--navy); }
+.msa-cats{ margin-top:0.55rem; gap:0.4rem 0.45rem; }
+.msa-cats-rot{ font-weight:600; color:var(--purple); margin-right:0.2rem; }
+.msa-leg{ display:inline-flex; align-items:center; gap:0.42rem; }
+.msa-leg i{ display:inline-block; }
+.msa-leg-tema i{ width:24px; height:13px; border-radius:7px; background:#1F3A5F; }
+.msa-leg-ativ i{ width:24px; height:13px; border-radius:4px; background:#fff; border:1.4px solid #A9B4C4; }
+.msa-leg-grossa i{ width:26px; height:3.5px; background:#1F3A5F; border-radius:2px; }
+.msa-leg-fina i{ width:26px; height:0; border-top:1.5px solid #8E99AB; }
+.msa-leg-C i, .msa-leg-R i, .msa-leg-O i{ width:26px; height:0; border-top-width:2.4px; border-top-style:solid; }
+.msa-leg-C i{ border-color:#2a78d6; }
+.msa-leg-R i{ border-color:#eb6834; border-top-style:dashed; }
+.msa-leg-O i{ border-color:#14946a; border-top-style:dotted; border-top-width:3px; }
+.msa-cat{ display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--paper-line); background:#fff; color:var(--purple); border-radius:99px; padding:0.22rem 0.72rem; font:500 0.78rem var(--font-body); cursor:pointer; }
+.msa-cat i{ width:12px; height:12px; border-radius:3px; background:#fff; border:1.4px solid #A9B4C4; }
+.msa-cat.msa-c-ren i{ background:#FBEFC9; border-color:#C99A1E; }
+.msa-cat.msa-c-pes i{ background:#D9F2E8; border-color:#14946a; }
+.msa-cat.msa-c-cli i{ background:#DFEBFA; border-color:#2a78d6; }
+.msa-cat.msa-c-nuc i{ background:#fff; border:2.4px solid #1F3A5F; }
+.msa-cat.msa-c-gen i{ background:#ECEDF1; border-color:#6B7588; border-style:dashed; }
+.msa-cat[aria-pressed="true"]{ background:var(--purple); border-color:var(--purple); color:#fff; }
+.msa-palco{ margin-top:0.7rem; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px; }
+.msa-svg{ display:block; width:100%; height:auto; font-family:var(--font-body); }
+.msa-casca{ fill:none; stroke:#fff; stroke-width:6; }
+.msa-traco{ fill:none; stroke:#8E99AB; stroke-width:1.5; transition:opacity .12s, stroke-width .12s; }
+.msa-l-grossa .msa-traco{ stroke:#1F3A5F; stroke-width:4; stroke-linecap:round; }
+.msa-l-grossa .msa-casca{ stroke-width:8; }
+.msa-l-fina .msa-traco{ stroke:#A3ADBC; }
+.msa-l-tipada .msa-traco{ stroke-width:2.2; }
+.msa-l-C .msa-traco{ stroke:#2a78d6; }
+.msa-l-R .msa-traco{ stroke:#eb6834; stroke-dasharray:8 4; }
+.msa-l-O .msa-traco{ stroke:#14946a; stroke-dasharray:2 4; stroke-linecap:round; stroke-width:2.8; }
+.msa-ponta-C{ fill:#2a78d6; } .msa-ponta-R{ fill:#eb6834; } .msa-ponta-O{ fill:#14946a; }
+.msa-sinal circle{ stroke:#fff; stroke-width:2; }
+.msa-sinal text{ fill:#fff; font-size:12.5px; font-weight:700; }
+.msa-sinal-C circle{ fill:#2a78d6; } .msa-sinal-R circle{ fill:#d9561f; } .msa-sinal-O circle{ fill:#0f7f5a; }
+.msa-no{ cursor:pointer; outline:none; transition:opacity .12s; }
+.msa-no rect{ fill:#fff; stroke:#A9B4C4; stroke-width:1.4; transition:stroke-width .12s; }
+.msa-no text{ fill:#1E2733; font-size:15.5px; font-weight:500; pointer-events:none; }
+.msa-tema rect{ fill:#1F3A5F; stroke:#152A45; }
+.msa-tema text{ fill:#fff; font-size:16px; font-weight:700; }
+.msa-c-ren rect{ fill:#FBEFC9; stroke:#C99A1E; }
+.msa-c-ren text{ fill:#4A350C; }
+.msa-c-pes rect{ fill:#D9F2E8; stroke:#14946a; }
+.msa-c-pes text{ fill:#0B4A35; }
+.msa-c-cli rect{ fill:#DFEBFA; stroke:#2a78d6; }
+.msa-c-cli text{ fill:#123F77; }
+.msa-c-gen rect{ fill:#ECEDF1; stroke:#6B7588; stroke-dasharray:5 3; }
+.msa-c-nuc rect{ stroke:#1F3A5F; stroke-width:3; }
+.msa-no:hover rect, .msa-no:focus-visible rect{ stroke:#EFB93C; stroke-width:3.5; }
+/* nó selecionado: o resto recua */
+.msa-svg.foco .msa-no, .msa-svg.foco .msa-l, .msa-svg.foco .msa-sinal{ opacity:0.16; }
+.msa-svg.foco .msa-no.on, .msa-svg.foco .msa-l.on, .msa-svg.foco .msa-sinal.on{ opacity:1; }
+.msa-svg.foco .msa-l.on .msa-traco{ stroke:#1F3A5F; stroke-width:3; }
+.msa-svg.foco .msa-l-tipada.on.msa-l-R .msa-traco{ stroke:#eb6834; }
+.msa-svg.foco .msa-l-tipada.on.msa-l-O .msa-traco{ stroke:#14946a; }
+.msa-svg.foco .msa-l-tipada.on.msa-l-C .msa-traco{ stroke:#2a78d6; }
+.msa-svg.foco .msa-no.sel rect{ stroke:#EFB93C; stroke-width:4.5; }
+.msa-painel{ margin-top:0.6rem; background:var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:0.6rem 0.9rem; font-size:0.88rem; line-height:1.5; min-height:3rem; }
+.secao .msa-painel p{ font-size:0.88rem; margin:0; color:var(--navy); line-height:1.5; }
+.secao .msa-painel p.msa-sel-tit{ color:var(--purple); font-weight:700; margin-bottom:0.25rem; }
+.msa-painel ul{ list-style:none; margin:0.3rem 0 0; padding:0; display:flex; flex-wrap:wrap; gap:0.3rem 0.4rem; }
+.msa-painel li{ background:#fff; border:1px solid var(--paper-line); border-radius:99px; padding:0.1rem 0.65rem; font-size:0.82rem; color:var(--purple); }
+.msa-painel ul.msa-frases{ display:block; }
+.msa-painel ul.msa-frases li{ background:none; border:0; padding:0.18rem 0; border-radius:0; color:#1E2733; }
+.msa-painel b.tp{ display:inline-block; min-width:1.35em; text-align:center; color:#fff; border-radius:99px; font-size:0.74rem; padding:0 0.3em; margin-right:0.3em; }
+.msa-painel b.tp-C{ background:#2a78d6; } .msa-painel b.tp-R{ background:#d9561f; } .msa-painel b.tp-O{ background:#0f7f5a; }
+.msa-lista{ margin-top:0.5rem; font-size:0.88rem; }
+.msa-lista summary{ cursor:pointer; color:var(--purple); font-weight:600; font-size:0.84rem; padding:0.2rem 0; }
+.msa-lista ul{ margin:0.4rem 0 0.6rem 1.1rem; padding:0; }
+.msa-lista li{ margin-bottom:0.3rem; line-height:1.5; color:#1E2733; }
+.secao .msa-lista p.msa-lista-sub{ font-size:0.86rem; font-weight:600; color:var(--purple); margin:0.6rem 0 0; }
+.secao p.msa-nota{ font-size:0.8rem; color:var(--navy); font-style:italic; margin:0.55rem 0 0; line-height:1.5; }
+/* abas dos três mapas (Bloco 4) */
+.msa-abas{ margin:1.2rem 0 1.4rem; }
+.msa-abas-botoes{ display:flex; flex-wrap:wrap; gap:0.4rem; }
+.msa-aba{ border:1px solid var(--paper-line); border-bottom:0; background:var(--paper-dim); color:var(--purple); border-radius:10px 10px 0 0; padding:0.45rem 1.1rem; font:600 0.88rem var(--font-body); cursor:pointer; }
+.msa-aba[aria-selected="true"]{ background:#fff; box-shadow:inset 0 3px 0 var(--amber); }
+.msa-abas .msa{ margin-top:0; border-top-left-radius:0; }
+/* quadro das duas visões */
+#quadro-visoes .quadro-corpo{ display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+.q-lista{ margin:0.4rem 0 0 1.1rem; padding:0; }
+.q-lista li{ font-family:var(--font-display); font-size:1rem; line-height:1.55; margin-bottom:0.3rem; color:var(--purple-deep); }
+/* construtor: o sistema de atividades do estudante */
+.sa-passo{ margin-top:1.1rem; }
+.sa-passo:first-child{ margin-top:0.3rem; }
+.sa-tit{ display:flex; align-items:baseline; gap:0.5rem; font-weight:700; color:var(--purple); font-size:0.95rem; margin-bottom:0.15rem; }
+.sa-tit b{ display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:50%; background:var(--purple); color:#fff; font-size:0.78rem; flex:none; }
+.secao p.sa-dica{ font-size:0.84rem; color:var(--navy); margin:0 0 0.5rem; line-height:1.5; }
+.sa-linhas{ display:flex; flex-direction:column; gap:0.45rem; }
+.sa-linha{ display:grid; gap:0.45rem; align-items:center; background:var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:0.5rem 0.6rem; }
+.sa-l-tema{ grid-template-columns:2.2rem 1fr 2rem; }
+.sa-l-ativ{ grid-template-columns:2.6rem minmax(12rem,1fr) 6.6rem auto 2rem; }
+.sa-l-lig{ grid-template-columns:minmax(7rem,1fr) minmax(7rem,1fr) 7.6rem minmax(12rem,2fr) 2rem; }
+.sa-id{ font-weight:700; font-size:0.8rem; color:var(--navy); text-align:center; }
+.sa-linha input[type=text], .sa-linha select{ width:100%; min-width:0; font:0.88rem var(--font-body); padding:0.4rem 0.5rem; border:1px solid var(--paper-line); border-radius:7px; background:#fff; color:#1E2733; }
+.sa-ren{ display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8rem; color:var(--amber-ink); white-space:nowrap; }
+.sa-temas{ grid-column:2 / -1; display:flex; flex-wrap:wrap; gap:0.25rem 0.7rem; font-size:0.8rem; color:var(--navy); }
+.sa-temas:empty{ display:none; }
+.sa-temas label{ display:inline-flex; align-items:center; gap:0.28rem; cursor:pointer; }
+.sa-botoes{ display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.55rem; }
+.sa-diag{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:0.6rem; margin-top:0.4rem; }
+.sa-sinal{ background:var(--paper); border:1px solid var(--paper-line); border-left:4px solid #A9B4C4; border-radius:8px; padding:0.5rem 0.7rem; font-size:0.84rem; line-height:1.45; }
+.sa-sinal strong{ display:block; color:var(--purple); font-size:0.82rem; }
+.sa-sinal em{ font-style:normal; color:var(--navy); }
+.sa-sinal.bom{ border-left-color:#14946a; } .sa-sinal.alerta{ border-left-color:#d9561f; } .sa-sinal.neutro{ border-left-color:#2a78d6; }
+.sa-vazio{ font-size:0.88rem; color:var(--navy); background:var(--paper); border:1px dashed var(--paper-line); border-radius:10px; padding:1rem; text-align:center; }
+.sa-mapa .msa{ margin:0.4rem 0 0; }
+.sa-mapa .msa-palco{ margin-top:0.4rem; }
+.msa-ampliar{ margin-left:auto; border:1px solid var(--purple); background:#fff; color:var(--purple); border-radius:8px; padding:0.28rem 0.75rem; font:600 0.78rem var(--font-body); cursor:pointer; }
+.msa-ampliar:hover{ background:var(--purple); color:#fff; }
+.secao p.msa-arraste{ display:none; font-size:0.78rem; color:var(--navy); margin:0.35rem 0 0; font-style:italic; }
+.msa.msa-cheia{ position:fixed; inset:0; z-index:3000; margin:0; border:0; border-radius:0; overflow:auto; padding:1rem 1.4rem 1.6rem; }
+.msa.msa-cheia .msa-palco{ overflow:visible; }
+.msa.msa-cheia .msa-svg{ width:100%; max-width:1500px; min-width:1040px; margin:0 auto; }
+html.msa-sem-rolagem, html.msa-sem-rolagem body{ overflow:hidden; }
+@media (max-width:900px){
+  .secao p.msa-arraste{ display:block; }
+  .msa.msa-cheia .msa-palco{ overflow-x:auto; }
+  .msa-svg{ min-width:760px; }
+  .sa-mapa .msa-svg{ min-width:700px; }
+  #quadro-visoes .quadro-corpo{ grid-template-columns:1fr; }
+  .sa-l-ativ{ grid-template-columns:2.4rem 1fr 2rem; }
+  .sa-l-ativ .sa-ge, .sa-l-ativ .sa-ren{ grid-column:2; }
+  .sa-l-lig{ grid-template-columns:1fr 2rem; }
+  .sa-l-lig > *{ grid-column:1; }
+  .sa-l-lig .pf-x{ grid-column:2; grid-row:1; }
+}
+@media (max-width:760px){
+  .msa{ padding:0.8rem 0.7rem; }
+  .quadro .msa{ margin:0.8rem 0 0.4rem; }
+}
+@media print{
+  .msa-palco{ overflow:visible; }
+  .msa-svg{ min-width:0; }
+  .msa-cats, .msa-painel, .msa-ampliar, .msa-arraste{ display:none; }
+}

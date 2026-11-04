@@ -20,6 +20,8 @@ Formato da tradução (uma linha por parágrafo):
     ?PAUSA chave | pergunta                pausa para responder (caixa de atividade)
     ?FIGURA p39 | título | eixo y | eixo x | rótulo da curva | alto | baixo
     ?QUADRO p40 | título [| id]   ...   ?NOTAQUADRO texto   ?FIMQUADRO
+    ?MAPA nome                             mapa de sistema de atividades (atividades_parteN.mapa_sistema)
+    título • item • item                   dentro de um quadro: vira título e lista
     [^1]  /  [^1]: texto                   nota de rodapé
 Marcações extras no material:
     ::: visual nome                        esquema visual gerado por atividades_parteN.visual(nome)
@@ -36,6 +38,7 @@ sys.path.insert(0, str(RAIZ / "ferramentas"))
 import atividades_parte1 as AT  # noqa: E402
 import atividades_parte2 as AT2  # noqa: E402
 import atividades_parte3 as AT3  # noqa: E402
+import atividades_parte4 as AT4  # noqa: E402
 
 PARTES = [
     {
@@ -58,6 +61,13 @@ PARTES = [
         "material": RAIZ / "conteudo" / "aula-3-material-estudante.md",
         "destino": RAIZ / "partes" / "parte-3.html",
         "atividades": AT3,
+    },
+    {
+        "n": 4,
+        "traducao": RAIZ / "conteudo" / "porter-parte-4-traducao.md",
+        "material": RAIZ / "conteudo" / "aula-4-material-estudante.md",
+        "destino": RAIZ / "partes" / "parte-4.html",
+        "atividades": AT4,
     },
 ]
 
@@ -100,6 +110,7 @@ def render_traducao(md, at):
     meta, corpo, subs = {}, [], []
     usados = set()
     par = 0
+    n_corpo = 0   # parágrafos do corpo (§): os quadros podem ficar no meio do texto sem mudar a numeração
     no_quadro = False
     n_quadro = 0
     nota_rodape = {}
@@ -149,6 +160,9 @@ def render_traducao(md, at):
             )
             no_quadro = True
             continue
+        if s.startswith("?MAPA"):
+            corpo.append(at.mapa_sistema(s[len("?MAPA"):].strip()))
+            continue
         if s.startswith("?NOTAQUADRO"):
             corpo.append(f'<p class="quadro-nota">{inline(s[len("?NOTAQUADRO"):].strip())}</p>')
             continue
@@ -164,12 +178,14 @@ def render_traducao(md, at):
         total_pal += palavras(texto)
         if no_quadro:
             n_quadro += 1
-        rot = f"Q{n_quadro}" if no_quadro else f"§{par}"
+        else:
+            n_corpo += 1
+        rot = f"Q{n_quadro}" if no_quadro else f"§{n_corpo}"
         pag_html = f'<span class="par-pag">p. {nova_pag}</span>' if nova_pag else ""
         corpo.append(
             f'<div class="par{" par-quadro" if no_quadro else ""}" id="p{par}" data-par="{par}" data-rotulo="{rot}">'
             f'<div class="par-margem"><span class="par-num">{rot}</span>{pag_html}</div>'
-            f'<div class="par-texto"><p>{inline(texto)}</p>'
+            f'<div class="par-texto">{par_texto(texto, no_quadro)}'
             f'<div class="par-nota" data-atividade hidden><label><span>Minha anotação sobre {rot}</span>'
             f'<textarea data-nota="{par}" rows="3" placeholder="O que este trecho diz para você? Concorda? Que exemplo do seu setor ilustra isso?"></textarea></label></div>'
             f"</div>"
@@ -186,6 +202,14 @@ def render_traducao(md, at):
         corpo.append(f'<div class="notas-rodape"><h4>Nota do autor</h4><ol>{itens}</ol></div>')
         total_pal += sum(palavras(v) for v in nota_rodape.values())
     return meta, "\n".join(corpo), subs, total_pal, par
+
+
+def par_texto(texto, no_quadro):
+    """Parágrafo da tradução. Num quadro, "título • item • item" vira título e lista."""
+    if no_quadro and " • " in texto:
+        cab, *itens = [x.strip() for x in texto.split(" • ")]
+        return f'<p><strong>{inline(cab)}</strong></p><ul class="q-lista">' + "".join(f"<li>{inline(x)}</li>" for x in itens) + "</ul>"
+    return f"<p>{inline(texto)}</p>"
 
 
 def figura_fronteira(pag, titulo, eixo_y, eixo_x, curva, alto, baixo):

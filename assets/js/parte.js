@@ -322,6 +322,243 @@
     };
   };
 
+  /* ----- Aula 4, Bloco 5: o sistema de atividades do estudante (temas, atividades, ligações, diagnóstico e mapa) -----
+     Formato salvo em aula4.sistema: { temas:[{id,nome}], atividades:[{id,nome,ge,ren,temas:[id]}], ligacoes:[{de,para,tipo,frase}] }.
+     Os ids (T1, A1...) não são renumerados: uma ligação continua valendo se outra linha for apagada. */
+  var GE = [['', 'G ou E?'], ['G', 'G: genérica'], ['E', 'E: específica']];
+  var TIPO_LIG = [['', 'Tipo?'], ['C', 'C: consistência'], ['R', 'R: reforço'], ['O', 'O: otimização']];
+  W.sistema = function (el) {
+    var d = { temas: [], atividades: [], ligacoes: [] }, tDes = null;
+    function vazio() {
+      return { temas: [{ id: 'T1', nome: '' }, { id: 'T2', nome: '' }, { id: 'T3', nome: '' }],
+        atividades: [novaAtiv(1), novaAtiv(2), novaAtiv(3)], ligacoes: [novaLig(), novaLig()] };
+    }
+    function novaAtiv(n) { return { id: 'A' + n, nome: '', ge: '', ren: false, temas: [] }; }
+    function novaLig() { return { de: '', para: '', tipo: '', frase: '' }; }
+    function proximo(lista, pre) {
+      var m = 0;
+      lista.forEach(function (x) { var k = parseInt(String(x.id).slice(pre.length), 10); if (k > m) m = k; });
+      return pre + (m + 1);
+    }
+    el.innerHTML =
+      '<div class="sa-passo"><div class="sa-tit"><b>2</b>Atividades</div>' +
+      '<p class="sa-dica">De 15 a 25 atividades concretas, incluindo o que a empresa deliberadamente não faz, pessoas e incentivos, cliente e parceiros. Comece pela lista que você escreveu antes de ler, complete-a e marque G ou E.</p>' +
+      '<div class="sa-linhas sa-ativ-l"></div><div class="sa-botoes"><button type="button" class="btn-add sa-add-ativ">+ Atividade</button><button type="button" class="btn-add sa-trazer">Trazer a lista do início da aula</button></div></div>' +
+      '<div class="sa-passo"><div class="sa-tit"><b>3</b>Temas de ordem superior</div>' +
+      '<p class="sa-dica">De 3 a 6 ideias que permeiam várias atividades. Tema não é meta nem valor. Cada tema que você escrever aparece como opção embaixo de cada atividade, no passo 2: marque as atividades que o sustentam (pelo menos três por tema).</p>' +
+      '<div class="sa-linhas sa-temas-l"></div><div class="sa-botoes"><button type="button" class="btn-add sa-add-tema">+ Tema</button></div></div>' +
+      '<div class="sa-passo"><div class="sa-tit"><b>4</b>Ligações entre atividades (e entre temas)</div>' +
+      '<p class="sa-dica">Em cada ligação, o tipo e uma frase. Nenhuma linha sem frase: se não der para escrever a frase, a ligação não existe.</p>' +
+      '<div class="sa-linhas sa-lig-l"></div><div class="sa-botoes"><button type="button" class="btn-add sa-add-lig">+ Ligação</button></div></div>' +
+      '<div class="sa-passo"><div class="sa-tit"><b>5</b>O desenho do seu mapa</div><div class="sa-mapa"></div></div>' +
+      '<div class="sa-passo"><div class="sa-tit"><b>6</b>O diagnóstico</div><div class="sa-diag" aria-live="polite"></div></div>';
+    var lT = el.querySelector('.sa-temas-l'), lA = el.querySelector('.sa-ativ-l'), lL = el.querySelector('.sa-lig-l');
+    function opcoes(lista, atual) {
+      return lista.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === atual ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+    }
+    function nomeNo(x) { return x.id + (x.nome ? ' · ' + (x.nome.length > 42 ? x.nome.slice(0, 41) + '…' : x.nome) : ''); }
+    function opcoesNos(atual) {
+      var h = '<option value="">Escolha…</option>';
+      if (d.temas.length) h += '<optgroup label="Temas">' + d.temas.map(function (t) { return '<option value="' + esc(t.id) + '"' + (t.id === atual ? ' selected' : '') + '>' + esc(nomeNo(t)) + '</option>'; }).join('') + '</optgroup>';
+      if (d.atividades.length) h += '<optgroup label="Atividades">' + d.atividades.map(function (a) { return '<option value="' + esc(a.id) + '"' + (a.id === atual ? ' selected' : '') + '>' + esc(nomeNo(a)) + '</option>'; }).join('') + '</optgroup>';
+      return h;
+    }
+    function caixasTemas(a) {
+      return d.temas.filter(function (t) { return t.nome.trim(); }).map(function (t) {
+        return '<label><input type="checkbox" class="sa-t" value="' + esc(t.id) + '"' + (a.temas.indexOf(t.id) >= 0 ? ' checked' : '') + '><span>' + esc(nomeNo(t)) + '</span></label>';
+      }).join('');
+    }
+    function montarTemas() {
+      lT.innerHTML = d.temas.map(function (t, i) {
+        return '<div class="sa-linha sa-l-tema" data-i="' + i + '"><span class="sa-id">' + esc(t.id) + '</span><input type="text" class="sa-nome" maxlength="90" aria-label="Tema ' + esc(t.id) + '" placeholder="Ex.: reposição frequente em lote pequeno">' +
+          '<button type="button" class="pf-x sa-x-tema" aria-label="Remover o tema ' + esc(t.id) + '">✕</button></div>';
+      }).join('');
+      lT.querySelectorAll('.sa-linha').forEach(function (l, i) { l.querySelector('.sa-nome').value = d.temas[i].nome; });
+    }
+    function montarAtivs() {
+      lA.innerHTML = d.atividades.map(function (a, i) {
+        return '<div class="sa-linha sa-l-ativ" data-i="' + i + '"><span class="sa-id">' + esc(a.id) + '</span>' +
+          '<input type="text" class="sa-nome" maxlength="120" aria-label="Atividade ' + esc(a.id) + '" placeholder="O que é feito, ou deliberadamente não é feito">' +
+          '<select class="sa-ge" aria-label="Genérica ou específica (' + esc(a.id) + ')">' + opcoes(GE, a.ge) + '</select>' +
+          '<label class="sa-ren"><input type="checkbox" class="sa-r"' + (a.ren ? ' checked' : '') + '>Renúncia</label>' +
+          '<button type="button" class="pf-x sa-x-ativ" aria-label="Remover a atividade ' + esc(a.id) + '">✕</button>' +
+          '<div class="sa-temas" role="group" aria-label="Temas da atividade ' + esc(a.id) + '">' + caixasTemas(a) + '</div></div>';
+      }).join('');
+      lA.querySelectorAll('.sa-linha').forEach(function (l, i) { l.querySelector('.sa-nome').value = d.atividades[i].nome; });
+    }
+    function montarLigs() {
+      lL.innerHTML = d.ligacoes.map(function (l, i) {
+        return '<div class="sa-linha sa-l-lig" data-i="' + i + '">' +
+          '<select class="sa-de" aria-label="Ligação ' + (i + 1) + ': de">' + opcoesNos(l.de) + '</select>' +
+          '<select class="sa-para" aria-label="Ligação ' + (i + 1) + ': para">' + opcoesNos(l.para) + '</select>' +
+          '<select class="sa-tp" aria-label="Ligação ' + (i + 1) + ': tipo">' + opcoes(TIPO_LIG, l.tipo) + '</select>' +
+          '<input type="text" class="sa-fr" maxlength="200" aria-label="Ligação ' + (i + 1) + ': frase que justifica" placeholder="A frase que justifica a ligação">' +
+          '<button type="button" class="pf-x sa-x-lig" aria-label="Remover a ligação ' + (i + 1) + '">✕</button></div>';
+      }).join('');
+      lL.querySelectorAll('.sa-linha').forEach(function (r, i) { r.querySelector('.sa-fr').value = d.ligacoes[i].frase; });
+    }
+    function montar() { montarTemas(); montarAtivs(); montarLigs(); atualizar(true); }
+    /* só o que tem nome entra no mapa e no diagnóstico */
+    function filtrado() {
+      var temas = d.temas.filter(function (t) { return t.nome.trim(); });
+      var ids = {}; temas.forEach(function (t) { ids[t.id] = 1; });
+      var ativs = d.atividades.filter(function (a) { return a.nome.trim(); }).map(function (a) {
+        return { id: a.id, nome: a.nome, ge: a.ge, ren: a.ren, temas: a.temas.filter(function (t) { return ids[t]; }) };
+      });
+      ativs.forEach(function (a) { ids[a.id] = 1; });
+      var ligs = d.ligacoes.filter(function (l) { return ids[l.de] && ids[l.para] && l.de !== l.para; });
+      return { temas: temas, atividades: ativs, ligacoes: ligs };
+    }
+    function diagnosticar(f) {
+      var nomes = function (l) { return l.map(function (a) { return a.id; }).join(', '); };
+      var comLig = {};
+      f.ligacoes.forEach(function (l) { comLig[l.de] = 1; comLig[l.para] = 1; });
+      var cards = [];
+      function card(cl, tit, txt) { cards.push('<div class="sa-sinal ' + cl + '"><strong>' + esc(tit) + '</strong><em>' + esc(txt) + '</em></div>'); }
+      var nucleo = f.atividades.filter(function (a) { return a.temas.length >= 2; });
+      card(nucleo.length ? 'bom' : 'neutro', 'Núcleo', nucleo.length ? nomes(nucleo) + ': ligadas a dois ou mais temas. Proteja com prioridade.' : 'Nenhuma atividade ligada a dois ou mais temas ainda. Um sistema sem núcleo é fácil de copiar.');
+      var orfas = f.atividades.filter(function (a) { return !a.temas.length && !comLig[a.id]; });
+      card(orfas.length ? 'alerta' : 'bom', 'Atividades órfãs', orfas.length ? nomes(orfas) + ': sem nenhuma ligação. Corte ou reconfigure para que se liguem.' : 'Nenhuma: todas se ligam a algo.');
+      var gIso = f.atividades.filter(function (a) { return a.ge === 'G' && !comLig[a.id]; });
+      var gInt = f.atividades.filter(function (a) { return a.ge === 'G' && comLig[a.id]; });
+      card(gIso.length ? 'neutro' : 'bom', 'Genéricas isoladas', gIso.length ? nomes(gIso) + ': é EO. Mantenha na agenda operacional, sem confundir com estratégia.' : 'Nenhuma marcada.');
+      if (gInt.length) card('bom', 'Genéricas integradas', nomes(gInt) + ': prática comum que ganha papel estratégico. Proteja as ligações, não a ferramenta.');
+      var fracos = f.temas.filter(function (t) { return f.atividades.filter(function (a) { return a.temas.indexOf(t.id) >= 0; }).length < 3; });
+      card(fracos.length ? 'alerta' : 'bom', 'Temas fracos', !f.temas.length ? 'Escreva os temas para ver este sinal.' : fracos.length ? nomes(fracos) + ': menos de três atividades. Reforce ou reveja o tema.' : 'Todos os temas têm ao menos três atividades.');
+      var ren = f.atividades.filter(function (a) { return a.ren; });
+      card(ren.length ? 'bom' : 'alerta', 'Renúncias no mapa', ren.length ? ren.length + (ren.length === 1 ? ' renúncia: ' : ' renúncias: ') + nomes(ren) + '.' : 'Nenhuma renúncia marcada. As renúncias são nós do mapa (seção 4.4).');
+      var semFrase = f.ligacoes.filter(function (l) { return !l.frase.trim() || !l.tipo; }).length;
+      card(semFrase ? 'alerta' : (f.ligacoes.length ? 'bom' : 'neutro'), 'Ligações', !f.ligacoes.length ? 'Nenhuma ligação ainda. Sem elas, o mapa é só uma lista.' : semFrase ? semFrase + ' de ' + f.ligacoes.length + ' sem frase ou sem tipo. Nenhuma linha sem frase.' : f.ligacoes.length + ' ligações, todas com frase e tipo.');
+      if (f.temas.length && (f.temas.length < 3 || f.temas.length > 6)) card('alerta', 'Número de temas', f.temas.length + ' temas. O método pede de 3 a 6; se há muitos, a posição não está clara.');
+      if (f.atividades.length && f.atividades.length < 15) card('neutro', 'Número de atividades', f.atividades.length + ' atividades. O método pede de 15 a 25.');
+      el.querySelector('.sa-diag').innerHTML = cards.join('');
+    }
+    function atualizar(agora) {
+      clearTimeout(tDes);
+      tDes = setTimeout(function () {
+        var f = filtrado();
+        diagnosticar(f);
+        var alvo = el.querySelector('.sa-mapa');
+        if (!f.temas.length && !f.atividades.length) { alvo.innerHTML = '<p class="sa-vazio">O mapa aparece aqui quando você escrever os primeiros temas e atividades.</p>'; return; }
+        if (window.MAPAS) MAPAS.desenhar(alvo, f);
+      }, agora ? 0 : 350);
+    }
+    /* mudou o nome de um tema ou atividade: atualiza os rótulos sem refazer o campo em que o estudante digita */
+    function rotulos() {
+      lA.querySelectorAll('.sa-linha').forEach(function (r, i) { r.querySelector('.sa-temas').innerHTML = caixasTemas(d.atividades[i]); });
+      lL.querySelectorAll('.sa-linha').forEach(function (r, i) {
+        r.querySelector('.sa-de').innerHTML = opcoesNos(d.ligacoes[i].de);
+        r.querySelector('.sa-para').innerHTML = opcoesNos(d.ligacoes[i].para);
+      });
+    }
+    el.addEventListener('input', function (e) {
+      var r = e.target.closest('.sa-linha'); if (!r) return;
+      var i = Number(r.dataset.i);
+      if (r.classList.contains('sa-l-tema')) { d.temas[i].nome = e.target.value; rotulos(); }
+      else if (r.classList.contains('sa-l-ativ') && e.target.classList.contains('sa-nome')) { d.atividades[i].nome = e.target.value; lL.querySelectorAll('.sa-linha').forEach(function (x, k) { x.querySelector('.sa-de').innerHTML = opcoesNos(d.ligacoes[k].de); x.querySelector('.sa-para').innerHTML = opcoesNos(d.ligacoes[k].para); }); }
+      else if (r.classList.contains('sa-l-lig') && e.target.classList.contains('sa-fr')) d.ligacoes[i].frase = e.target.value;
+      atualizar();
+    });
+    el.addEventListener('change', function (e) {
+      var r = e.target.closest('.sa-linha'); if (!r) return;
+      var i = Number(r.dataset.i), t = e.target;
+      if (t.classList.contains('sa-ge')) d.atividades[i].ge = t.value;
+      else if (t.classList.contains('sa-r')) d.atividades[i].ren = t.checked;
+      else if (t.classList.contains('sa-t')) {
+        var lista = d.atividades[i].temas, k = lista.indexOf(t.value);
+        if (t.checked && k < 0) lista.push(t.value);
+        if (!t.checked && k >= 0) lista.splice(k, 1);
+      }
+      else if (t.classList.contains('sa-de')) d.ligacoes[i].de = t.value;
+      else if (t.classList.contains('sa-para')) d.ligacoes[i].para = t.value;
+      else if (t.classList.contains('sa-tp')) d.ligacoes[i].tipo = t.value;
+      atualizar();
+    });
+    el.addEventListener('click', function (e) {
+      var t = e.target, foco;
+      if (t.closest('.sa-add-tema')) { d.temas.push({ id: proximo(d.temas, 'T'), nome: '' }); montarTemas(); rotulos(); foco = lT.querySelectorAll('.sa-nome'); foco[foco.length - 1].focus(); return; }
+      if (t.closest('.sa-add-ativ')) { d.atividades.push(novaAtiv(parseInt(proximo(d.atividades, 'A').slice(1), 10))); montarAtivs(); montarLigs(); foco = lA.querySelectorAll('.sa-nome'); foco[foco.length - 1].focus(); return; }
+      if (t.closest('.sa-add-lig')) { d.ligacoes.push(novaLig()); montarLigs(); return; }
+      if (t.closest('.sa-trazer')) { trazer(); return; }
+      var x = t.closest('.pf-x'); if (!x) return;
+      var r = x.closest('.sa-linha'), i = Number(r.dataset.i), id;
+      if (x.classList.contains('sa-x-tema')) {
+        id = d.temas[i].id; d.temas.splice(i, 1);
+        d.atividades.forEach(function (a) { a.temas = a.temas.filter(function (k) { return k !== id; }); });
+        d.ligacoes = d.ligacoes.filter(function (l) { return l.de !== id && l.para !== id; });
+      } else if (x.classList.contains('sa-x-ativ')) {
+        id = d.atividades[i].id; d.atividades.splice(i, 1);
+        d.ligacoes = d.ligacoes.filter(function (l) { return l.de !== id && l.para !== id; });
+      } else {
+        d.ligacoes.splice(i, 1);
+      }
+      if (!d.temas.length) d.temas.push({ id: 'T1', nome: '' });
+      if (!d.atividades.length) d.atividades.push(novaAtiv(1));
+      if (!d.ligacoes.length) d.ligacoes.push(novaLig());
+      montar();
+    });
+    function trazer() {
+      var c = document.querySelector('[data-campo="prep_lista"]');
+      var linhas = c ? c.value.split('\n').map(function (l) { return l.replace(/^\s*[-•*\d.)]+\s*/, '').trim(); }).filter(Boolean) : [];
+      if (!linhas.length) { VD.toast('Você ainda não escreveu a lista. Ela fica em "Antes de ler", no início do módulo Texto de Porter.'); return; }
+      var ja = {}; d.atividades.forEach(function (a) { if (a.nome.trim()) ja[a.nome.trim().toLowerCase()] = 1; });
+      d.atividades = d.atividades.filter(function (a) { return a.nome.trim() || a.ge || a.ren || a.temas.length; });
+      var novas = 0;
+      linhas.forEach(function (l) {
+        if (ja[l.toLowerCase()]) return;
+        ja[l.toLowerCase()] = 1;
+        d.atividades.push({ id: proximo(d.atividades, 'A'), nome: l.slice(0, 120), ge: '', ren: /^(n[aã]o|sem)\b/i.test(l), temas: [] });
+        novas++;
+      });
+      if (!d.atividades.length) d.atividades.push(novaAtiv(1));
+      montarAtivs(); montarLigs(); atualizar(true);
+      VD.toast(novas ? novas + ' atividades trazidas da lista.' : 'As atividades da lista já estão aqui.');
+    }
+    function limpo() {
+      return {
+        temas: d.temas.filter(function (t) { return t.nome.trim(); }),
+        atividades: d.atividades.filter(function (a) { return a.nome.trim(); }),
+        ligacoes: d.ligacoes.filter(function (l) { return l.de || l.para || l.tipo || l.frase.trim(); })
+      };
+    }
+    function rotuloNo(v, id) {
+      var x = (v.temas || []).concat(v.atividades || []).filter(function (n) { return n.id === id; })[0];
+      return x ? id + ' (' + x.nome + ')' : (id || '—');
+    }
+    return {
+      coletar: function () { var v = limpo(); return (v.temas.length || v.atividades.length || v.ligacoes.length) ? v : null; },
+      aplicar: function (v) {
+        if (v && (v.temas || v.atividades || v.ligacoes)) {
+          d = {
+            temas: (v.temas || []).map(function (t) { return { id: String(t.id), nome: String(t.nome || '') }; }),
+            atividades: (v.atividades || []).map(function (a) { return { id: String(a.id), nome: String(a.nome || ''), ge: String(a.ge || ''), ren: !!a.ren, temas: Array.isArray(a.temas) ? a.temas.map(String) : [] }; }),
+            ligacoes: (v.ligacoes || []).map(function (l) { return { de: String(l.de || ''), para: String(l.para || ''), tipo: String(l.tipo || ''), frase: String(l.frase || '') }; })
+          };
+          if (!d.temas.length) d.temas.push({ id: 'T1', nome: '' });
+          if (!d.atividades.length) d.atividades.push(novaAtiv(1));
+          if (!d.ligacoes.length) d.ligacoes.push(novaLig());
+        } else d = vazio();
+        montar();
+      },
+      resumo: function (v) {
+        var S = 'Bloco 5 · Mapa da sua empresa', linhas = [];
+        (v.temas || []).forEach(function (t) { linhas.push([S, 'Tema ' + t.id, t.nome]); });
+        (v.atividades || []).forEach(function (a) {
+          linhas.push([S, 'Atividade ' + a.id + ': ' + a.nome, (a.ge ? (a.ge === 'G' ? 'Genérica' : 'Específica') : 'Sem G/E') + (a.ren ? ' · Renúncia' : '') + ' · Temas: ' + ((a.temas || []).join(', ') || '—')]);
+        });
+        (v.ligacoes || []).forEach(function (l) {
+          var t = TIPO_LIG.filter(function (x) { return x[0] === l.tipo; })[0];
+          linhas.push([S, 'Ligação ' + rotuloNo(v, l.de) + ' → ' + rotuloNo(v, l.para), (t && l.tipo ? t[1] : 'Sem tipo') + ' · ' + (l.frase || 'sem frase')]);
+        });
+        return linhas;
+      },
+      respondido: function (v) {
+        return !!(v && (v.temas || []).length >= 3 && (v.atividades || []).length >= 6 &&
+          (v.ligacoes || []).filter(function (l) { return l.de && l.para && l.tipo && String(l.frase || '').trim(); }).length >= 3);
+      }
+    };
+  };
+
   /* ----- espelho: mostra (só para leitura, sempre escapado) o que o estudante escreveu em outro campo ----- */
   function atualizarEspelhos() {
     document.querySelectorAll('[data-espelho]').forEach(function (el) {

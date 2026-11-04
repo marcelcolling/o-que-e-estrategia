@@ -57,6 +57,18 @@ PARTES = {
         "nomes": ["J.C. Penney", "Sears", "Continental Airlines", "Southwest", "Continental Lite", "Neutrogena", "Skincare Institute",
                   "Ivory", "Ikea", "Honda Motor Company", "Toyota Motor Corporation", "Civic", "Corolla", "Estados Unidos", "Japão"],
     },
+    4: {
+        "pagina": RAIZ / "partes" / "parte-4.html",
+        "material": C / "aula-4-material-estudante.md",
+        "ref": C / "referencia-parte-4-en.txt",
+        "subtitulos": [(5, "Tipos de fit"), (15, "Fit e sustentabilidade")],
+        "n_quadro": 4,
+        "extras": [("nota 2", "Milgrom"), ("nota 3", "Rivkin")],
+        "nomes": ["Southwest", "Boeing 737", "Vanguard", "Neutrogena", "Bic Corporation", "Gap", "Continental Lite", "Toys R Us", "Child World",
+                  "Lionel Leisure", "Ikea", "Paul Milgrom", "John Roberts", "Yingyi Qian", "American Economic Review",
+                  "Journal of Accounting and Economics", "Jan Rivkin", "Nicolaj Siggelkow"],
+        "mapas": {"ikea": (20, 32), "vanguard": (25, 42), "southwest": (18, 31)},   # nós e ligações contados nas figuras das pp. 47–49
+    },
 }
 
 
@@ -68,7 +80,8 @@ class Texto(html.parser.HTMLParser):
         self.alvos = alvos
         self.pilha = []  # (tag, dentro_do_alvo, pular)
         self.saida = {a: [] for a in alvos}
-        self.pars = []    # parágrafos da tradução (div.par)
+        self.pars = []    # parágrafos do corpo da tradução (div.par)
+        self.pars_q = []  # parágrafos dos quadros (div.par.par-quadro)
         self.par_atual = None
 
     def handle_starttag(self, tag, attrs):
@@ -81,7 +94,8 @@ class Texto(html.parser.HTMLParser):
             return
         if alvo == "traducao" and "par" in (a.get("class") or "").split():
             self.par_atual = []
-            self.pars.append(self.par_atual)
+            # os quadros podem ficar no meio do texto; na referência em inglês eles vêm depois do corpo
+            (self.pars_q if "par-quadro" in a["class"].split() else self.pars).append(self.par_atual)
             tag = "div-par"
         self.pilha.append((tag, alvo, pula))
 
@@ -149,7 +163,7 @@ def conferir_traducao(cfg, pagina):
             en[sec].append(l.strip())
     p = Texto(["traducao"])
     p.feed(pagina)
-    pt_pars = [" ".join(x).strip() for x in p.pars]
+    pt_pars = [" ".join(x).strip() for x in p.pars + p.pars_q]
     pt_todo = " ".join(p.saida["traducao"])
     n_corpo = len(en["CORPO"])
     en_pars = en["CORPO"] + en["QUADRO"][:cfg["n_quadro"]]
@@ -177,6 +191,11 @@ def conferir_traducao(cfg, pagina):
     faltam = sorted(numeros(" ".join(en["CORPO"] + en["QUADRO"] + en["NOTA"])) - numeros(pt_todo), key=int)
     print("   números do original: " + ("todos presentes" if not faltam else "FALTAM " + ", ".join(faltam)))
     ok &= not faltam
+    for nome, (n_nos, n_lig) in cfg.get("mapas", {}).items():
+        trecho = re.search(r'<figure class="msa" data-mapa="' + nome + r'".*?</figure>', pagina, re.S).group(0)
+        a, b = len(re.findall(r'data-no="', trecho)), len(re.findall(r'<g class="msa-l ', trecho))
+        print(f"   mapa {nome}: {a} nós e {b} ligações (na figura do original: {n_nos} e {n_lig})")
+        ok &= (a, b) == (n_nos, n_lig)
     nomes = [n for n in cfg["nomes"] if n not in pt_todo]
     print("   nomes próprios: " + ("todos presentes" if not nomes else "FALTAM " + ", ".join(nomes)))
     ok &= not nomes

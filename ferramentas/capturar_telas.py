@@ -72,6 +72,22 @@ CAPTURAS = [
     ("m-p3-lista", "/partes/parte-3.html", "3-6-exercicio-a-sua-lista-do-nao", 520, 2400),
     ("m-p3-bsc", "/partes/parte-3.html", "7-7-o-bsc-da-vivelar-com-a-camada-de-renuncias", 520, 2200),
     ("m-p3-exit", "/partes/parte-3.html", "exit-ticket", 520, 2400),
+    ("p4-indice", "/partes/parte-4.html", "", 1366, 1500),
+    ("p4-prep", "/partes/parte-4.html", "antes-de-ler", 1366, 1200),
+    ("p4-ikea", "/partes/parte-4.html", "mapa-ikea", 1366, 1200),
+    ("p4-vanguard", "/partes/parte-4.html", "mapa-vanguard", 1366, 1350),
+    ("p4-southwest", "/partes/parte-4.html", "mapa-southwest", 1366, 1200),
+    ("p4-visoes", "/partes/parte-4.html", "quadro-visoes", 1366, 1000),
+    ("p4-classifica", "/partes/parte-4.html", "2-5-treine-a-classificacao", 1366, 1200),
+    ("p4-abas", "/partes/parte-4.html", "4-3-o-que-observar-nos-tres-mapas-de-porter", 1366, 1500),
+    ("p4-vivelar", "/partes/parte-4.html", "passo-5-o-desenho", 1366, 1300),
+    ("p4-construtor", "/partes/parte-4.html", "5-5-construa-o-mapa-da-sua-empresa", 1366, 2000),
+    ("p4-exit", "/partes/parte-4.html", "exit-ticket", 1366, 1500),
+    ("m-p4-indice", "/partes/parte-4.html", "", 520, 2200),
+    ("m-p4-ikea", "/partes/parte-4.html", "mapa-ikea", 520, 1500),
+    ("m-p4-visoes", "/partes/parte-4.html", "quadro-visoes", 520, 1300),
+    ("m-p4-vivelar", "/partes/parte-4.html", "passo-5-o-desenho", 520, 1500),
+    ("m-p4-construtor", "/partes/parte-4.html", "5-5-construa-o-mapa-da-sua-empresa", 520, 2600),
 ]
 
 

@@ -17,7 +17,7 @@ As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Goog
 
 ## O que vai e o que não vai para a internet
 
-- Vai: a página inicial, as traduções das Partes I a III, os materiais das Aulas 1 a 3 e as atividades.
+- Vai: a página inicial, as traduções das Partes I a IV, os materiais das Aulas 1 a 4 e as atividades.
 - **Não vai:** o PDF do artigo (não há link para ele em lugar nenhum), o texto original em inglês e os arquivos `.md` de origem. Eles ficam na pasta `conteudo/`, que só existe no seu computador (OneDrive) e é ignorada pelo git.
 
 ## Ligar a planilha (uma vez)

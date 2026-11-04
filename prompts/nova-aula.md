@@ -7,7 +7,7 @@ Não é preciso anexar o PDF nem o artigo em inglês: eles já estão na pasta.
 
 ---
 
-Quero publicar a **Aula [3 | 4 | 5]**, correspondente à **Parte [III | IV | V]** do artigo *What Is Strategy?* (Porter, 1996), no portal "Entendendo Porter: O que é estratégia?", que já está no ar com as Aulas 1 e 2.
+Quero publicar a **Aula [3 | 4 | 5]**, correspondente à **Parte [III | IV | V]** do artigo *What Is Strategy?* (Porter, 1996), no portal "Entendendo Porter: O que é estratégia?", que já está no ar com as aulas anteriores.
 
 **Material da aula (anexo):** [nome do arquivo, ex.: aula_porter_parte3_trade_offs.md]. Se não estiver anexado, procure em `C:\Users\LENOVO\Downloads`.
 
@@ -15,7 +15,7 @@ Quero publicar a **Aula [3 | 4 | 5]**, correspondente à **Parte [III | IV | V]*
 
 ## Antes de tudo
 
-1. Leia o `CLAUDE.md` do projeto inteiro. Ele é a fonte da verdade: arquitetura, decisões que eu já tomei, como funciona o salvamento, armadilhas e como validar. Depois leia o `README.md` e os arquivos `ferramentas/gerar_parte.py`, `ferramentas/atividades_parte2.py`, `ferramentas/conferir_integridade.py` e `ferramentas/testes/teste_ponta_a_ponta.html`.
+1. Leia o `CLAUDE.md` do projeto inteiro. Ele é a fonte da verdade: arquitetura, decisões que eu já tomei, como funciona o salvamento, armadilhas e como validar. Depois leia o `README.md` e os arquivos `ferramentas/gerar_parte.py`, `ferramentas/atividades_parte4.py`, `ferramentas/conferir_integridade.py` e `ferramentas/testes/teste_ponta_a_ponta.html`.
 2. Rode `git status` e `git log --oneline -5` e confirme que está tudo limpo e sincronizado com o GitHub.
 3. **A turma já está respondendo às aulas publicadas.** Antes de mexer em qualquer coisa, rode `python ferramentas/fotografar_chaves.py antes`. No fim, rode `python ferramentas/fotografar_chaves.py comparar`: as aulas existentes precisam sair **OK** (mesmas chaves, opções, parágrafos, widgets e atividade). Não altere `assets/js/portal.js` nem `apps-script/Codigo.gs`; o Painel da planilha já tem colunas para as Aulas 1 a 5. Em `assets/js/parte.js`, só **acrescente** código (widgets novos); não mude o que as aulas anteriores usam.
 4. Me apresente um **plano curto** antes de construir: a lista dos 12 módulos (ou quantos forem), as atividades de cada bloco com as chaves que pretende usar, os widgets novos (se houver), o que será simplificado ou consolidado no material e como as figuras ou quadros da parte serão tratados. Pergunte só o que for decisão minha.
