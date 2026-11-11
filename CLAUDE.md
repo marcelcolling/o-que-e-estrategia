@@ -19,18 +19,19 @@ O núcleo (sessão, salvamento, planilha, testes) veio do portal "Vieses e Decis
 
 - Só a **tradução** vai para o site. Nenhum link para o PDF, em lugar nenhum. O texto em inglês também não é publicado.
 - Os `.md` de origem (material da aula, texto original) **não vão para o GitHub**: `conteudo/` está no `.gitignore` e fica só na pasta local (OneDrive). O que é publicado é o HTML gerado.
-- Uma parte do artigo por aula. Partes I a IV publicadas; a Parte V aparece como "Em breve" na home.
+- Uma parte do artigo por aula. As cinco partes estão publicadas (Aulas 1 a 5; a Aula 5 desde 11/11/2026).
+- **Nunca reproduzir o texto original em inglês nas mensagens do Claude** (a saída é bloqueada pelo filtro de conteúdo e o professor pediu só a tradução). A referência em inglês de conferência é gravada por script direto no arquivo local, imprimindo só contagens (ver `ferramentas/gravar_referencia_parte5.py`).
 - Identidade do "Vieses e Decisão" com azul-escuro no lugar do roxo.
 - **Material e atividades são uma coisa só:** na home, um único botão por aula.
 - **O material fala direto com o estudante** ("você"), sem roteiro de aula, tempos, notas ao professor nem "os alunos devem…". Os originais do professor (`conteudo/aula-N-material.md`) são só referência; cada página é gerada da versão revisada `conteudo/aula-N-material-estudante.md` (enxuta, sem redundâncias, dúvidas repetidas incorporadas aos blocos, modelos de sala virando atividades). A integridade é conferida contra essa versão.
-- **Um módulo por vez:** a página da aula abre num índice de cartões; cada módulo (Mapa, Texto de Porter, Abertura, Blocos 1–7, Fechamento, Para consulta) é aberto separadamente, com "Anterior / Índice / Próximo".
+- **Um módulo por vez:** a página da aula abre num índice de cartões; cada módulo (Mapa, Texto de Porter, Abertura, Blocos 1–7 (1–9 na Aula 5), Fechamento, Para consulta) é aberto separadamente, com "Anterior / Índice / Próximo".
 - **Mapa de aprendizagem** no lugar dos objetivos: cada objetivo com Domino / Domino parcialmente / Ainda não domino e uma anotação opcional.
 
 ## Arquitetura (site estático, sem build de JS)
 
 ```
 index.html                     home: hero + sessão, trilha das 5 partes, "Quem é Michael Porter" (bio + obras por fase)
-partes/parte-N.html            GERADO por ferramentas/gerar_parte.py (não editar à mão): índice + 12 módulos (N = 1, 2, 3, 4)
+partes/parte-N.html            GERADO por ferramentas/gerar_parte.py (não editar à mão): índice + 12 módulos (N = 1 a 4) ou 14 (N = 5)
 conteudo/  (fora do git)       porter-parte-N-traducao.md, aula-N-material-estudante.md (fonte), aula-N-material.md (original do professor),
                                referencia-parte-N-en.txt, referencia-porter-original.md
 ferramentas/gerar_parte.py     tradução + material (Markdown) + atividades -> página da parte (cada "##" do material vira um módulo;
@@ -40,7 +41,9 @@ ferramentas/atividades_parte1.py  caixas de atividade (chaves data-campo), mapa(
 ferramentas/atividades_parte2.py  idem para a Parte II; reaproveita os componentes e o MODELO da Parte I (troca só os títulos)
 ferramentas/atividades_parte3.py  idem para a Parte III (sem widget; usa espelho() da Parte II e sub() para separar itens numa caixa)
 ferramentas/atividades_parte4.py  idem para a Parte IV (widget `sistema`; `mapa_sistema()` e os visuais `mapas_abas` e `mapa_vivelar`)
-ferramentas/mapas_atividades.py   dados e desenho (SVG) dos mapas de sistemas de atividades (Ikea, Vanguard, Southwest e Vivelar). Rodar sozinho confere os mapas: nó sobre nó, linha sobre nó alheio, nó solto, cruzamentos
+ferramentas/atividades_parte5.py  idem para a Parte V (sem widget; esquema `ciclo` da armadilha do crescimento e visual `neutrogena` com abas antes/depois)
+ferramentas/gravar_referencia_parte5.py  grava a referência em inglês da Parte V a partir do PDF (PyMuPDF), sem imprimir o texto
+ferramentas/mapas_atividades.py   dados e desenho (SVG) dos mapas de sistemas de atividades (Ikea, Vanguard, Southwest, Vivelar e, na Aula 5, Neutrogena antes/depois, com ligações `conflitos` do tipo X e a categoria `mov`). Rodar sozinho confere os mapas: nó sobre nó, linha sobre nó alheio, nó solto, cruzamentos
 ferramentas/conferir_integridade.py  confere material (palavra por palavra) e tradução (contra o PDF)
 ferramentas/capturar_telas.py  capturas no Edge headless via CDP (1366px e 520px)
 ferramentas/fotografar_chaves.py  protege as respostas salvas: fotografa e compara as chaves das páginas de aula
@@ -49,7 +52,7 @@ ferramentas/testes/            teste de ponta a ponta com Apps Script simulado (
 assets/js/portal.js            núcleo: sessão, login, salvamento automático, sincronização, conflito, barra superior, guia de uso
 assets/js/parte.js             página da parte: campos, destacar/anotar parágrafos, widgets, resumo, progresso por módulo,
                                navegação por hash (#m-… abre um módulo; #id interno abre o módulo dele e rola até o ponto)
-assets/js/mapas.js             só na Aula 4: interação dos mapas (clicar em um nó, botões "Destacar", abas, "Ampliar") e o desenho automático do mapa do estudante (`MAPAS.desenhar`)
+assets/js/mapas.js             nas Aulas 4 e 5: interação dos mapas (clicar em um nó, botões "Destacar", abas, "Ampliar") e o desenho automático do mapa do estudante (`MAPAS.desenhar`)
 assets/js/vivelar.js           modelo mensal do caso Vivelar (Apêndice A) + simulador
 assets/js/leitura.js           (não é usado na página da parte; sobrou do núcleo de referência)
 assets/css/portal.css · leitura.css · parte.css
@@ -61,7 +64,7 @@ apps-script/Codigo.gs          back-end na planilha (doPost entrar/salvar, abas 
 - Igual ao portal de referência: `VD.entrar` (nome + palavra-chave), `VD.ferramenta({ id, titulo, crumb, coletar, aplicar, resumo })`, `localStorage` na hora e Apps Script alguns segundos depois, conflito por timestamp, `[data-vd-salvar]` = botão "Salvar respostas".
 - **Prefixos próprios no navegador:** `pe_sessao_v1`, `pe_dados_v1::`, `pe_leitura_`. Os portais do professor ficam no mesmo domínio (`marcelcolling.github.io`) e compartilham o `localStorage`; com os prefixos do outro portal, a sessão e o `aula1` vazariam entre eles. Há um teste para isso.
 - **Uma atividade por aula:** ids `aula1` a `aula5`. Formato salvo (ver `parte.js`):
-  `{ v:1, campos:{ chave: texto|opção|true }, notas:{ "8": texto }, destaques:[3,8], <widgets> }`. Widgets da Aula 1: `fronteira`, `portfolio`, `logo`, `simulador:{ p, exp }`. Da Aula 2: `cadeia` (atividades comparadas) e `rastreio` (matriz de rastreabilidade do BSC). A Aula 3 não tem widget: a lista do "não" (`prep_nao1..3`, `prep_perde1..3`) é espelhada na abertura e no Bloco 3 (`b3_cls_N`, `b3_cls_N_just`), o filtro de straddling usa `b7_fN`/`b7_fN_porque` e o exit ticket tem três botões "trazer". Da Aula 4: `sistema` (`{ temas:[{id,nome}], atividades:[{id,nome,ge,ren,temas:[id]}], ligacoes:[{de,para,tipo,frase}] }`; os ids T1, A1... não são renumerados, para as ligações continuarem válidas quando uma linha é apagada; conta como respondido com 3 temas, 6 atividades e 3 ligações com frase). O texto do estudante no mapa passa por `VD.esc`. Elementos `[data-espelho="chave"]` só mostram, escapado, o valor de outro campo (ex.: a frase do início).
+  `{ v:1, campos:{ chave: texto|opção|true }, notas:{ "8": texto }, destaques:[3,8], <widgets> }`. Widgets da Aula 1: `fronteira`, `portfolio`, `logo`, `simulador:{ p, exp }`. Da Aula 2: `cadeia` (atividades comparadas) e `rastreio` (matriz de rastreabilidade do BSC). A Aula 3 não tem widget: a lista do "não" (`prep_nao1..3`, `prep_perde1..3`) é espelhada na abertura e no Bloco 3 (`b3_cls_N`, `b3_cls_N_just`), o filtro de straddling usa `b7_fN`/`b7_fN_porque` e o exit ticket tem três botões "trazer". Da Aula 4: `sistema` (`{ temas:[{id,nome}], atividades:[{id,nome,ge,ren,temas:[id]}], ligacoes:[{de,para,tipo,frase}] }`; os ids T1, A1... não são renumerados, para as ligações continuarem válidas quando uma linha é apagada; conta como respondido com 3 temas, 6 atividades e 3 ligações com frase). A Aula 5 não tem widget: a lista de acréscimos (`prep_acrescimos`) é espelhada nos Blocos 3 e 5 e as causas mais fortes (`b1_top3`) no Bloco 9; chaves `b1_c1..13`, `b3_a1..4` (+`_cls`, `_liga`), `b4_t1..5`, `b5_q1..5`, `b7_ag1..6`, `b8_duvida1..4`, `b9_p1..7`, `b9_der_*`, `exit_*`. O texto do estudante no mapa passa por `VD.esc`. Elementos `[data-espelho="chave"]` só mostram, escapado, o valor de outro campo (ex.: a frase do início).
 - Módulos escondidos usam o atributo `hidden`, mas continuam no DOM: coleta, aplicação e resumo funcionam com todos eles. Ao abrir um módulo, `parte.js` dispara `resize` para recalcular a altura das caixas de texto e o gráfico do simulador.
 - O progresso conta perguntas (campo de texto ou grupo de opções) e widgets; não contam as caixas da síntese nem campos `data-opcional` (anotações do mapa).
 - As chaves de `campos` vêm do atributo `data-campo` em `atividades_parte1.py`. **Não renomeie chaves em uso** (as respostas ficariam órfãs). O mapa usa `mapa_1`…`mapa_7` e `mapa_N_nota`. A chave `b2_duvida7` deixou de existir na revisão (a Dúvida 7 foi incorporada ao Bloco 5). Para tirar uma pergunta, apague a caixa; para acrescentar, use chave nova. Os parágrafos da tradução são identificados pelo número (`notas`/`destaques`): **não junte nem divida parágrafos** depois que a turma começar.
@@ -111,7 +114,7 @@ O professor cola o `Codigo.gs` novo no editor (Extensões › Apps Script), salv
 ## Como validar antes de publicar
 
 1. Gerar + conferir integridade (acima).
-2. `.\ferramentas\testes\rodar_testes.ps1`: precisa terminar com `FAIL/ERRO: 0` (105 verificações hoje, incluindo que os dados das aulas anteriores ficam intactos ao usar as seguintes).
+2. `.\ferramentas\testes\rodar_testes.ps1`: precisa terminar com `FAIL/ERRO: 0` (123 verificações hoje, incluindo que os dados das aulas anteriores ficam intactos ao usar as seguintes).
 2b. **Chaves das aulas já em uso:** `python ferramentas/fotografar_chaves.py antes` antes de mexer e `python ferramentas/fotografar_chaves.py comparar` depois de gerar (confere `data-campo`, pares opção/chave, `data-par`/`data-rotulo`, `data-widget` e o id em `PARTE.iniciar` de cada `partes/parte-N.html`). As aulas existentes precisam sair OK. O servidor simulado (`servidor_simulado.py`) segue as mesmas regras do `Codigo.gs`.
 3. `python ferramentas/capturar_telas.py <pasta>` e olhar as capturas (1366px e 520px; o script também avisa se houver rolagem horizontal).
 4. Se mexeu no back-end ou na URL: teste contra o Apps Script real com um usuário "Teste (apagar)" e leia a planilha pelo conector do Drive. Depois peça ao professor para removê-lo pelo menu **Portal da disciplina › Remover um estudante…**.
@@ -123,5 +126,5 @@ Azul-escuro `#1F3A5F` / profundo `#152A45` / noite `#0E1D31` (no CSS, as variáv
 
 ## Pendências conhecidas
 
-- Parte V: material e atividades ainda não existem ("Em breve"). Na Aula 4, as dúvidas que repetiam blocos (elo mais forte, fit genérico, cálculo 0,9 × 0,9, fit e EO, copiar o visível) foram incorporadas às seções 1.4, 1.6, 3.2, 3.5 e 3.4; os modelos de sala viraram o widget `sistema` e a caixa "Do mapa para a execução". Na Aula 3, as dúvidas que repetiam blocos ("todo não é trade-off?", "a Aula 1 não mandava eliminar trade-offs?", "com dinheiro tudo se copia?", "reposicionamento × straddling") foram incorporadas aos Blocos 1, 4 e 5.
+- Aula 5: das sete dúvidas do original, três repetiam blocos e foram incorporadas (foco no cliente ao 1.3, setores novos ao 6.2, continuidade ao 7.4); os modelos de sala viraram atividades. O mapa da Neutrogena é construção didática (temas nossos) e a nota do mapa diz isso. Na Aula 4, as dúvidas que repetiam blocos (elo mais forte, fit genérico, cálculo 0,9 × 0,9, fit e EO, copiar o visível) foram incorporadas às seções 1.4, 1.6, 3.2, 3.5 e 3.4; os modelos de sala viraram o widget `sistema` e a caixa "Do mapa para a execução". Na Aula 3, as dúvidas que repetiam blocos ("todo não é trade-off?", "a Aula 1 não mandava eliminar trade-offs?", "com dinheiro tudo se copia?", "reposicionamento × straddling") foram incorporadas aos Blocos 1, 4 e 5.
 - Erros de digitação do original em inglês tratados na tradução: "in race to stay ahead" (traduzido como "na corrida"), "anothers'". Na nota 2, "functions, activities, and functions" foi traduzido sem a repetição. No mapa da Vanguard, "No marketing changes" foi traduzido ao pé da letra ("Sem mudanças de marketing"), embora possa ser erro de impressão de "charges".

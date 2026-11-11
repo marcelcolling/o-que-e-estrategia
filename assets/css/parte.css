@@ -683,3 +683,30 @@ html.msa-sem-rolagem, html.msa-sem-rolagem body{ overflow:hidden; }
   .msa-svg{ min-width:0; }
   .msa-cats, .msa-painel, .msa-ampliar, .msa-arraste{ display:none; }
 }
+
+/* =========================================================
+   Aula 5: ciclo da armadilha do crescimento e mapa da Neutrogena (movimentos e conflitos)
+   ========================================================= */
+.esquema-ciclo svg{ max-width:660px; }
+.cic-no rect{ fill:#fff; stroke:#1F3A5F; stroke-width:2; }
+.cic-entrada rect{ fill:#1F3A5F; stroke:#152A45; stroke-width:2; }
+.cic-saida rect{ fill:#F6F5F0; stroke:#5E6878; stroke-width:1.6; stroke-dasharray:6 4; }
+.esquema-ciclo text{ font-family:var(--font-body); font-size:15px; font-weight:600; fill:#1E2733; }
+.cic-entrada text{ fill:#fff; }
+.cic-saida text{ fill:#455066; font-weight:500; }
+.esquema-ciclo .cic-centro{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:17px; fill:#5E6878; }
+.esquema-ciclo .cic-rot{ font-size:13px; font-weight:500; font-style:italic; fill:#5E6878; }
+.cic-s{ stroke:#d9561f; stroke-width:2.6; fill:none; }
+.cic-s-entrada{ stroke:#1F3A5F; stroke-width:2.6; fill:none; }
+.cic-s-saida{ stroke:#5E6878; stroke-width:2; stroke-dasharray:6 5; fill:none; }
+.cic-s-p{ fill:#d9561f; } .cic-s-entrada-p{ fill:#1F3A5F; } .cic-s-saida-p{ fill:#5E6878; }
+.lg-cic{ background:#d9561f; } .lg-cic-saida{ background:transparent; border:2px dashed #5E6878; border-radius:3px !important; }
+
+.msa-c-mov rect{ fill:#FBE4E0; stroke:#B3261E; stroke-width:2; }
+.msa-c-mov text{ fill:#5C1410; }
+.msa-cat.msa-c-mov i{ background:#FBE4E0; border-color:#B3261E; }
+.msa-l-conflito .msa-traco{ stroke:#B3261E; stroke-width:2.4; stroke-dasharray:3 5; stroke-linecap:round; }
+.msa-svg.foco .msa-l-conflito.on .msa-traco{ stroke:#B3261E; }
+.msa-sinal-X circle{ fill:#B3261E; }
+.msa-leg-X i{ width:26px; height:0; border-top:2.4px dotted #B3261E; }
+.msa-painel b.tp-X{ background:#B3261E; }

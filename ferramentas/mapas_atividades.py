@@ -1,6 +1,7 @@
 """
 Mapas de sistemas de atividades da Aula 4: os três de Porter (Ikea, Vanguard, Southwest), redesenhados
-com os rótulos traduzidos, e o da Vivelar (construção didática da aula).
+com os rótulos traduzidos, e o da Vivelar (construção didática da aula). Da Aula 5: a Neutrogena antes e depois
+dos movimentos de crescimento da Parte V (construção didática com os fatos de Porter; "conflitos" são ligações X).
 
 Os nós e as ligações dos mapas de Porter foram traçados um a um a partir das figuras das pp. 47–49. A posição
 dos nós foi refeita para evitar cruzamentos; a topologia (quem se liga a quem) é a do original.
@@ -12,6 +13,7 @@ Uso:
 Texto do nó: "|" separa as linhas. Categorias (cores e botões de destaque, leitura nossa, não de Porter):
     ren = renúncias e limites · pes = pessoas e incentivos · cli = o cliente executa ou é educado
     nuc = núcleo (ligada a dois ou mais temas) · gen = genérica na técnica (só no mapa da Vivelar)
+    mov = movimento de crescimento da Parte V (só no mapa da Neutrogena depois)
 """
 import html
 import math
@@ -24,6 +26,7 @@ CATEGORIAS = {
     "cli": ("Atividades do cliente", "O cliente executa a atividade ou é educado para agir de certo jeito."),
     "nuc": ("Núcleo", "Atividades ligadas a dois ou mais temas: as mais difíceis de copiar."),
     "gen": ("Genéricas na técnica", "Ferramentas e práticas que qualquer concorrente pode adotar."),
+    "mov": ("Movimentos de crescimento", "O que a Neutrogena fez no início dos anos 1990, segundo a Parte V."),
 }
 
 TIPOS = {"C": "Consistência", "R": "Reforço", "O": "Otimização"}
@@ -184,7 +187,52 @@ VIVELAR = {
     ],
 }
 
-MAPAS = {"ikea": IKEA, "vanguard": VANGUARD, "southwest": SOUTHWEST, "vivelar": VIVELAR}
+# ---------------------------------------------------------------- Aula 5: a Neutrogena antes e depois (fatos das Partes III, IV e V)
+_NEUTRO_BASE = {
+    "N1": ("T", "N1|Credibilidade médica", 560, 290, ""),
+    "N2": ("T", "N2|Produto suave,|fiel ao conceito", 230, 470, ""),
+    "N3": ("T", "N3|Canal farmácia com|preço sustentado", 890, 470, ""),
+    "PR": ("A", "Propagandistas|visitando|dermatologistas", 380, 90, ""),
+    "AN": ("A", "Revistas médicas,|mala direta e|congressos", 740, 90, ""),
+    "HO": ("A", "Hotéis sofisticados,|com a embalagem|da marca", 1000, 220, ""),
+    "SI": ("A", "Pesquisa no|próprio instituto", 250, 290, ""),
+    "FL": ("A", "Fabricação lenta|e mais cara", 110, 610, "ren"),
+    "ND": ("A", "Não acrescentar|desodorantes e|hidratantes", 380, 610, "ren"),
+}
+_NEUTRO_FINAS = ["PR-N1", "AN-N1", "HO-N1", "HO-AN", "SI-N1", "SI-N2", "FL-N2", "ND-N2"]
+
+NEUTROGENA = {
+    "titulo": "Neutrogena: a posição original",
+    "W": 1120, "H": 680,
+    "nos": dict(_NEUTRO_BASE, **{
+        "FA": ("A", "Distribuição|concentrada|em farmácias", 760, 610, "ren"),
+        "NP": ("A", "Sem promoções|de preço", 1010, 610, "ren"),
+    }),
+    "grossas": ["N1-N2", "N1-N3"],
+    "finas": _NEUTRO_FINAS + ["FA-N3", "NP-N3"],
+}
+
+NEUTROGENA_DEPOIS = {
+    "titulo": "Neutrogena: depois dos movimentos de crescimento",
+    "W": 1120, "H": 680,
+    "nos": dict(_NEUTRO_BASE, **{
+        "VM": ("A", "Varejistas de massa|(como o Wal-Mart)", 760, 610, "mov"),
+        "PP": ("A", "Promoções|de preço", 1030, 340, "mov"),
+        "DX": ("A", "Demaquilante, xampu|e outros produtos em|que não era única", 560, 545, "mov"),
+    }),
+    "grossas": ["N1-N2", "N1-N3"],
+    "finas": _NEUTRO_FINAS,
+    # ligações de conflito: (de, para, frase)
+    "conflitos": [
+        ("VM", "N3", "O canal de massa contradiz a distribuição concentrada em farmácias."),
+        ("PP", "N3", "As promoções desfazem a renúncia que sustentava o preço."),
+        ("PP", "N1", "Promoção de preço não combina com a imagem de produto recomendado por médicos."),
+        ("DX", "N1", "Produtos em que a marca não era única diluem a credibilidade."),
+    ],
+}
+
+MAPAS = {"ikea": IKEA, "vanguard": VANGUARD, "southwest": SOUTHWEST, "vivelar": VIVELAR,
+         "neutrogena": NEUTROGENA, "neutrogena_depois": NEUTROGENA_DEPOIS}
 
 
 # ---------------------------------------------------------------- geometria
@@ -211,6 +259,8 @@ def _pares(m):
         out.append((x, y, "grossa", "", "", False))
     for de, para, tipo, frase, seta in m.get("tipadas", []):
         out.append((de, para, "tipada", tipo, frase, seta))
+    for de, para, frase in m.get("conflitos", []):
+        out.append((de, para, "conflito", "X", frase, False))
     return out
 
 
@@ -389,7 +439,9 @@ def lista(nome):
     m = MAPAS[nome]
     rot = {k: _rotulo_puro(n[1]) for k, n in m["nos"].items()}
     viz = {k: [] for k in rot}
-    for a, b, *_ in _pares(m):
+    for a, b, classe, *_ in _pares(m):
+        if classe == "conflito":
+            continue
         viz[a].append(b)
         viz[b].append(a)
     temas = [k for k, n in m["nos"].items() if n[0] == "T"]
@@ -399,11 +451,14 @@ def lista(nome):
         tt = [rot[v] for v in viz[t] if m["nos"][v][0] == "T"]
         itens.append(f'<li><strong>{E(rot[t])}.</strong>' + (f' Atividades ligadas: {E("; ".join(ativ))}.' if ativ else "")
                      + (f' Temas ligados: {E("; ".join(tt))}.' if tt else "") + "</li>")
-    entre = sorted({" — ".join(sorted((rot[a], rot[b]))) for a, b, *_ in _pares(m)
-                    if m["nos"][a][0] == "A" and m["nos"][b][0] == "A"})
+    entre = sorted({" — ".join(sorted((rot[a], rot[b]))) for a, b, classe, *_ in _pares(m)
+                    if m["nos"][a][0] == "A" and m["nos"][b][0] == "A" and classe != "conflito"})
     h = f'<ul class="msa-lista-temas">{"".join(itens)}</ul>'
     if entre:
         h += '<p class="msa-lista-sub">Ligações entre atividades:</p><ul class="msa-lista-pares">' + "".join(f"<li>{E(x)}</li>" for x in entre) + "</ul>"
+    if m.get("conflitos"):
+        h += ('<p class="msa-lista-sub">Conflitos com os temas:</p><ul class="msa-lista-pares">'
+              + "".join(f"<li>{E(rot[a])} × {E(rot[b])}: {E(f)}</li>" for a, b, f in m["conflitos"]) + "</ul>")
     return h
 
 
@@ -423,6 +478,8 @@ def figura(nome, sufixo=""):
         linhas_leg += '<span class="msa-leg msa-leg-grossa"><i></i>Ligação entre temas</span><span class="msa-leg msa-leg-fina"><i></i>Ligação com atividade</span>'
     else:
         linhas_leg += '<span class="msa-leg msa-leg-fina"><i></i>Atividade sustenta o tema</span>'
+    if m.get("conflitos"):
+        tipos += '<span class="msa-leg msa-leg-X"><i></i>X: conflito com o tema</span>'
     total = len(_pares(m))
     n_nos = len(m["nos"])
     return (

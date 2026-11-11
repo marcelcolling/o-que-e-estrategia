@@ -88,6 +88,23 @@ CAPTURAS = [
     ("m-p4-visoes", "/partes/parte-4.html", "quadro-visoes", 520, 1300),
     ("m-p4-vivelar", "/partes/parte-4.html", "passo-5-o-desenho", 520, 1500),
     ("m-p4-construtor", "/partes/parte-4.html", "5-5-construa-o-mapa-da-sua-empresa", 520, 2600),
+    ("p5-indice", "/partes/parte-5.html", "", 1366, 1700),
+    ("p5-prep", "/partes/parte-5.html", "antes-de-ler", 1366, 1100),
+    ("p5-reconectar", "/partes/parte-5.html", "quadro-reconectar", 1366, 1400),
+    ("p5-emergentes", "/partes/parte-5.html", "quadro-emergentes", 1366, 1100),
+    ("p5-causas", "/partes/parte-5.html", "1-4-as-causas-na-sua-empresa", 1366, 1600),
+    ("p5-maytag", "/partes/parte-5.html", "2-3-caso-maytag-pp-51-52", 1366, 1200),
+    ("p5-ciclo", "/partes/parte-5.html", "2-5-o-ciclo-da-armadilha", 1366, 1300),
+    ("p5-neutrogena", "/partes/parte-5.html", "3-3-a-neutrogena-antes-e-depois", 1366, 2400),
+    ("p5-acrescimos", "/partes/parte-5.html", "3-5-os-acrescimos-da-sua-empresa-no-mapa", 1366, 1800),
+    ("p5-teste", "/partes/parte-5.html", "4-5-o-teste-da-extensao", 1366, 2000),
+    ("p5-vivelar", "/partes/parte-5.html", "9-6-o-caso-vivelar-18-meses-depois", 1366, 1800),
+    ("p5-exit", "/partes/parte-5.html", "exit-ticket", 1366, 1300),
+    ("m-p5-indice", "/partes/parte-5.html", "", 520, 2600),
+    ("m-p5-ciclo", "/partes/parte-5.html", "2-5-o-ciclo-da-armadilha", 520, 1400),
+    ("m-p5-neutrogena", "/partes/parte-5.html", "3-3-a-neutrogena-antes-e-depois", 520, 2600),
+    ("m-p5-causas", "/partes/parte-5.html", "1-4-as-causas-na-sua-empresa", 520, 2400),
+    ("m-p5-vivelar", "/partes/parte-5.html", "9-6-o-caso-vivelar-18-meses-depois", 520, 2400),
 ]
 
 

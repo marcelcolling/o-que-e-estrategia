@@ -4,10 +4,10 @@ Portal da disciplina Execução Estratégica. Cada aula corresponde a uma parte 
 
 1. **Mapa de aprendizagem:** marca, em cada objetivo, se domina, domina parcialmente ou ainda não domina, com uma anotação opcional;
 2. **Texto de Porter:** a tradução da parte, com botões para destacar e anotar cada parágrafo e pausas para responder;
-3. **Abertura, Blocos 1 a 7 e Fechamento:** o material da aula, escrito para o estudante, com as atividades no próprio texto (os comentários ficam recolhidos até ele responder), o caso Vivelar com simulador e o exit ticket;
+3. **Abertura, blocos (7 nas Aulas 1 a 4, 9 na Aula 5) e Fechamento:** o material da aula, escrito para o estudante, com as atividades no próprio texto (os comentários ficam recolhidos até ele responder), o caso Vivelar com simulador e o exit ticket;
 4. **Para consulta:** como a simulação funciona, armadilhas comuns e referências.
 
-O material publicado é a versão revisada de cada aula (`conteudo/aula-N-material-estudante.md`). Os seus originais (`conteudo/aula-N-material.md`) ficam guardados como referência. Hoje estão publicadas as Aulas 1 a 3.
+O material publicado é a versão revisada de cada aula (`conteudo/aula-N-material-estudante.md`). Os seus originais (`conteudo/aula-N-material.md`) ficam guardados como referência. Hoje estão publicadas as cinco aulas, uma para cada parte do artigo.
 
 As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Google, alguns segundos depois.
 
@@ -17,7 +17,7 @@ As respostas são salvas sozinhas: no navegador, na hora, e na sua planilha Goog
 
 ## O que vai e o que não vai para a internet
 
-- Vai: a página inicial, as traduções das Partes I a IV, os materiais das Aulas 1 a 4 e as atividades.
+- Vai: a página inicial, as traduções das Partes I a V, os materiais das Aulas 1 a 5 e as atividades.
 - **Não vai:** o PDF do artigo (não há link para ele em lugar nenhum), o texto original em inglês e os arquivos `.md` de origem. Eles ficam na pasta `conteudo/`, que só existe no seu computador (OneDrive) e é ignorada pelo git.
 
 ## Ligar a planilha (uma vez)
@@ -44,7 +44,7 @@ Enquanto a URL não estiver configurada, o portal funciona em "modo local": as r
 
 ## Atualizar o conteúdo
 
-O conteúdo da página da Parte I é gerado a partir dos arquivos em `conteudo/`. Para corrigir o material ou a tradução, edite o `.md` correspondente e peça ao Claude para regenerar, conferir a integridade, testar e publicar. Ou faça você mesmo:
+O conteúdo das páginas das partes é gerado a partir dos arquivos em `conteudo/`. Para corrigir o material ou a tradução, edite o `.md` correspondente e peça ao Claude para regenerar, conferir a integridade, testar e publicar. Ou faça você mesmo:
 
 ```
 python ferramentas/gerar_parte.py
@@ -55,6 +55,6 @@ git add -A; git commit -m "Atualiza material"; git push
 
 **Cuidado depois que a turma começar:** não renomeie perguntas existentes nem junte ou divida parágrafos da tradução. As respostas já salvas estão ligadas a eles.
 
-## Próximas aulas
+## Aulas publicadas
 
-As Partes IV e V já aparecem na trilha como "Em breve". Para liberar uma, basta enviar o material da aula ao Claude. A tradução da parte e as atividades seguem o mesmo padrão das Aulas 1 a 3, sem mexer nas respostas já salvas das aulas anteriores.
+As cinco partes do artigo estão publicadas, uma por aula. Para revisar o material de uma aula, edite o `.md` em `conteudo/` e peça ao Claude para regenerar, conferir, testar e publicar, sem mexer nas respostas já salvas.

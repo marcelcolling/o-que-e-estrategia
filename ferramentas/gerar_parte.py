@@ -39,6 +39,7 @@ import atividades_parte1 as AT  # noqa: E402
 import atividades_parte2 as AT2  # noqa: E402
 import atividades_parte3 as AT3  # noqa: E402
 import atividades_parte4 as AT4  # noqa: E402
+import atividades_parte5 as AT5  # noqa: E402
 
 PARTES = [
     {
@@ -68,6 +69,13 @@ PARTES = [
         "material": RAIZ / "conteudo" / "aula-4-material-estudante.md",
         "destino": RAIZ / "partes" / "parte-4.html",
         "atividades": AT4,
+    },
+    {
+        "n": 5,
+        "traducao": RAIZ / "conteudo" / "porter-parte-5-traducao.md",
+        "material": RAIZ / "conteudo" / "aula-5-material-estudante.md",
+        "destino": RAIZ / "partes" / "parte-5.html",
+        "atividades": AT5,
     },
 ]
 
@@ -205,10 +213,12 @@ def render_traducao(md, at):
 
 
 def par_texto(texto, no_quadro):
-    """Parágrafo da tradução. Num quadro, "título • item • item" vira título e lista."""
+    """Parágrafo da tradução. Num quadro, "título • item • item" vira título e lista.
+    Se o que vem antes da lista termina em ":", é um parágrafo que apresenta a lista (texto normal, não título)."""
     if no_quadro and " • " in texto:
         cab, *itens = [x.strip() for x in texto.split(" • ")]
-        return f'<p><strong>{inline(cab)}</strong></p><ul class="q-lista">' + "".join(f"<li>{inline(x)}</li>" for x in itens) + "</ul>"
+        cab_html = f"<p>{inline(cab)}</p>" if cab.endswith(":") else f"<p><strong>{inline(cab)}</strong></p>"
+        return cab_html + '<ul class="q-lista">' + "".join(f"<li>{inline(x)}</li>" for x in itens) + "</ul>"
     return f"<p>{inline(texto)}</p>"
 
 

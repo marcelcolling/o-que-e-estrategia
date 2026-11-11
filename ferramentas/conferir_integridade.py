@@ -69,6 +69,16 @@ PARTES = {
                   "Journal of Accounting and Economics", "Jan Rivkin", "Nicolaj Siggelkow"],
         "mapas": {"ikea": (20, 32), "vanguard": (25, 42), "southwest": (18, 31)},   # nós e ligações contados nas figuras das pp. 47–49
     },
+    5: {
+        "pagina": RAIZ / "partes" / "parte-5.html",
+        "material": C / "aula-5-material-estudante.md",
+        "ref": C / "referencia-parte-5-en.txt",
+        "subtitulos": [(1, "A falha em escolher"), (8, "A armadilha do crescimento"), (12, "Crescimento lucrativo"), (17, "O papel da liderança")],
+        "n_quadro": 9,
+        "extras": [],
+        "nomes": ["Maytag Corporation", "Jenn-Air", "Hardwick Stove", "Hoover", "Admiral", "Magic Chef", "Neutrogena", "Wal-Mart Stores",
+                  "Carmike", "Estados Unidos"],
+    },
 }
 
 
